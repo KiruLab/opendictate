@@ -65,6 +65,7 @@ class DictationDaemon:
         self.i18n = get_translator(CONFIG_PATH)
         self.model_size = self.config.get("whisper_model_size", "medium")
         self.model = None
+        self.config_window = None
         self.state = "IDLE"  
         self.next_action = None
         self.record_proc = None
@@ -169,6 +170,8 @@ class DictationDaemon:
             logging.error(f"Error exporting state: {e}")
 
     def show_notification(self, title, message, timeout=1500):
+        if not self.config.get("show_notifications", True):
+            return
         try:
             subprocess.Popen([
                 "notify-send", 
@@ -359,75 +362,82 @@ class DictationDaemon:
                 )
                 self.indicator.set_status(AppIndicator.IndicatorStatus.ACTIVE)
             
-            menu = Gtk.Menu()
-            
-            self.status_menu_item = Gtk.MenuItem(label=self.i18n.t("loading_model"))
-            self.status_menu_item.set_sensitive(False)
-            menu.append(self.status_menu_item)
-            menu.append(Gtk.SeparatorMenuItem())
-            
-            # Model size submenu
-            model_menu_item = Gtk.MenuItem(label=self.i18n.t("whisper_model"))
-            model_submenu = Gtk.Menu()
-            model_menu_item.set_submenu(model_submenu)
-            
-            self.model_radios = {}
-            group = None
-            for size in ["tiny", "base", "small", "medium", "large-v3"]:
-                radio = Gtk.RadioMenuItem.new_with_label(group, size)
-                group = radio.get_group()
-                if self.model_size == size:
-                    radio.set_active(True)
-                radio.connect('toggled', self.on_model_changed, size)
-                self.model_radios[size] = radio
-                model_submenu.append(radio)
-                
-            menu.append(model_menu_item)
-            menu.append(Gtk.SeparatorMenuItem())
-            
-            self.auto_send_check = Gtk.CheckMenuItem(label=self.i18n.t("auto_send"))
-            self.auto_send_check.set_active(self.config.get("auto_send", False))
-            self.auto_send_check.connect("toggled", self.on_auto_send_toggled_from_ui)
-            menu.append(self.auto_send_check)
-            
-            self.ai_check = Gtk.CheckMenuItem(label=self.i18n.t("ai_cleanup"))
-            self.ai_check.set_active(self.config.get("ai_enabled", False))
-            self.ai_check.connect("toggled", self.on_ai_toggled_from_ui)
-            menu.append(self.ai_check)
-            
-            menu.append(Gtk.SeparatorMenuItem())
-            
-            import os
-            opendeck_plugin_path = os.path.expanduser("~/.config/opendeck/plugins/com.butcherwutcher.dictate.sdplugin")
-            plugin_installed = os.path.exists(opendeck_plugin_path)
-            
-            opendeck_label = self.i18n.t("opendeck_installed") if plugin_installed else self.i18n.t("opendeck_not_installed")
-            item_opendeck = Gtk.MenuItem(label=opendeck_label)
-            item_opendeck.connect('activate', self.install_opendeck_plugin)
-            menu.append(item_opendeck)
-            
-            menu.append(Gtk.SeparatorMenuItem())
-            
-            item_config = Gtk.MenuItem(label=self.i18n.t("settings"))
-            item_config.connect('activate', self.open_config_window)
-            menu.append(item_config)
-            
-            menu.append(Gtk.SeparatorMenuItem())
-            
-            item_quit = Gtk.MenuItem(label=self.i18n.t("quit"))
-            item_quit.connect('activate', Gtk.main_quit)
-            menu.append(item_quit)
-            
-            menu.show_all()
-            if HAS_INDICATOR:
-                self.indicator.set_menu(menu)
+            self.build_menu()
         except Exception as e:
             logging.error(f"Error setting up indicator: {e}")
+
+    def build_menu(self):
+        menu = Gtk.Menu()
+        
+        self.status_menu_item = Gtk.MenuItem(label=self.i18n.t("loading_model"))
+        self.status_menu_item.set_sensitive(False)
+        menu.append(self.status_menu_item)
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        # Model size submenu
+        model_menu_item = Gtk.MenuItem(label=self.i18n.t("whisper_model"))
+        model_submenu = Gtk.Menu()
+        model_menu_item.set_submenu(model_submenu)
+        
+        self.model_radios = {}
+        group = None
+        for size in ["tiny", "base", "small", "medium", "large-v3"]:
+            radio = Gtk.RadioMenuItem.new_with_label(group, size)
+            group = radio.get_group()
+            if self.model_size == size:
+                radio.set_active(True)
+            radio.connect('toggled', self.on_model_changed, size)
+            self.model_radios[size] = radio
+            model_submenu.append(radio)
+            
+        menu.append(model_menu_item)
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        self.auto_send_check = Gtk.CheckMenuItem(label=self.i18n.t("auto_send"))
+        self.auto_send_check.set_active(self.config.get("auto_send", False))
+        self.auto_send_check.connect("toggled", self.on_auto_send_toggled_from_ui)
+        menu.append(self.auto_send_check)
+        
+        self.ai_check = Gtk.CheckMenuItem(label=self.i18n.t("ai_cleanup"))
+        self.ai_check.set_active(self.config.get("ai_enabled", False))
+        self.ai_check.connect("toggled", self.on_ai_toggled_from_ui)
+        menu.append(self.ai_check)
+        
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        import os
+        opendeck_plugin_path = os.path.expanduser("~/.config/opendeck/plugins/com.kirulab.dictate.sdplugin")
+        plugin_installed = os.path.exists(opendeck_plugin_path)
+        
+        opendeck_label = self.i18n.t("opendeck_installed") if plugin_installed else self.i18n.t("opendeck_not_installed")
+        item_opendeck = Gtk.MenuItem(label=opendeck_label)
+        item_opendeck.connect('activate', self.install_opendeck_plugin)
+        menu.append(item_opendeck)
+        
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        item_config = Gtk.MenuItem(label=self.i18n.t("settings"))
+        item_config.connect('activate', self.open_config_window)
+        menu.append(item_config)
+        
+        menu.append(Gtk.SeparatorMenuItem())
+        
+        item_quit = Gtk.MenuItem(label=self.i18n.t("quit"))
+        item_quit.connect('activate', Gtk.main_quit)
+        menu.append(item_quit)
+        
+        menu.show_all()
+        if HAS_INDICATOR and hasattr(self, 'indicator'):
+            self.indicator.set_menu(menu)
+            
+        # Actualizar estado del menu si el daemon ya esta listo
+        if self.state not in ["LOADING", "IDLE"]:
+            self.status_menu_item.set_label(self.state)
 
 
             
     def open_config_window(self, widget=None):
-        if self.config_window:
+        if getattr(self, 'config_window', None):
             self.config_window.present()
             return
             
@@ -451,6 +461,8 @@ class DictationDaemon:
 
     def on_config_saved(self):
         self.config = self.load_config()
+        self.i18n = get_translator(CONFIG_PATH)
+        self.build_menu()
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(self.config.get("auto_send", False))
         if hasattr(self, 'ai_check'):
@@ -476,7 +488,7 @@ class DictationDaemon:
         import shutil
         import subprocess
         opendeck_plugins_dir = os.path.expanduser("~/.config/opendeck/plugins/")
-        plugin_name = "com.butcherwutcher.dictate.sdplugin"
+        plugin_name = "com.kirulab.dictate.sdplugin"
         target_dir = os.path.join(opendeck_plugins_dir, plugin_name)
         source_dir = os.path.join(os.path.dirname(__file__), "plugins", plugin_name)
         
@@ -699,7 +711,7 @@ class DictationDaemon:
                 self.audio_file_handle.close()
                 
             self.status_icon.set_text("❌")
-            GLib.timeout_add(1000, self.reset_state)
+            GLib.timeout_add(700, self.reset_state)
         elif self.state == "PREVIEW":
             self.reset_state()
 
@@ -1060,7 +1072,7 @@ class DictationDaemon:
         self.status_icon.show()
         self.status_icon.set_text("❌")
         self.show_error_notification("Error: Transcripción", str(err))
-        GLib.timeout_add(2000, self.reset_state)
+        GLib.timeout_add(700, self.reset_state)
 
     def parse_punctuation(self, text):
         replacements = {

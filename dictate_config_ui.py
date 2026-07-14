@@ -76,6 +76,15 @@ class ConfigWindow(Gtk.Window):
         switch_box6.pack_start(self.autostart_switch, False, False, 0)
         general_box.pack_start(switch_box6, False, False, 0)
         
+        switch_box7 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_notifications = Gtk.Label(label=self.i18n.t("lbl_notifications"))
+        self.notifications_switch = Gtk.Switch()
+        self.notifications_switch.set_active(self.config.get("show_notifications", True))
+        self.notifications_switch.connect("notify::active", self.auto_save)
+        switch_box7.pack_start(lbl_notifications, False, False, 0)
+        switch_box7.pack_start(self.notifications_switch, False, False, 0)
+        general_box.pack_start(switch_box7, False, False, 0)
+        
         # Tab 2: IA / LLM
         ia_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         ia_box.set_border_width(15)
@@ -237,6 +246,8 @@ class ConfigWindow(Gtk.Window):
         self.ai_enabled_switch.set_active(self.config.get("ai_enabled", False))
         self.hide_bubble_switch.set_active(self.config.get("hide_bubble", False))
         self.auto_pause_switch.set_active(self.config.get("auto_pause_media", True))
+        if hasattr(self, 'notifications_switch'):
+            self.notifications_switch.set_active(self.config.get("show_notifications", True))
         
         self.api_key_entry.set_text(self.config.get("api_key", ""))
         self.model_entry.set_text(self.config.get("model", "gemma-4"))
@@ -264,6 +275,8 @@ class ConfigWindow(Gtk.Window):
         self.config["ai_enabled"] = self.ai_enabled_switch.get_active()
         self.config["hide_bubble"] = self.hide_bubble_switch.get_active()
         self.config["auto_pause_media"] = self.auto_pause_switch.get_active()
+        if hasattr(self, 'notifications_switch'):
+            self.config["show_notifications"] = self.notifications_switch.get_active()
 
         # Handle autostart desktop file
         autostart_dir = os.path.expanduser("~/.config/autostart")

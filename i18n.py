@@ -49,11 +49,13 @@ TRANSLATIONS = {
         "transcription_language": "Transcription Language:",
         "transcription_auto": "Automatic",
         
-        "lbl_autosend": "Auto-Send (Enter):",
-        "lbl_ai_enabled": "AI Cleaning:",
-        "lbl_hide_bubble": "Hide Bubble (OpenDeck Mode):",
-        "lbl_auto_pause": "Pause media when recording:",
-        "lbl_autostart": "Start automatically with system:",
+        "lbl_autosend": "Auto-send on completion",
+        "lbl_ai_enabled": "AI Cleanup and Formatting",
+        "lbl_hide_bubble": "Hide Text Bubble",
+        "lbl_auto_pause": "Auto-pause Media",
+        "lbl_autostart": "Start with System",
+        "lbl_notifications": "Show System Notifications",
+        "lbl_vad": "VAD Filter (Anti-noise)",
         
         "btn_save_general": "Save General Settings",
         "btn_save_ai": "Save AI Settings",
@@ -65,7 +67,6 @@ TRANSLATIONS = {
         "lbl_sys_prompt": "System Prompt:",
         
         "lbl_whisper_model": "Whisper Model:",
-        "lbl_vad": "VAD Filter (Ignore silence):",
         "lbl_beam": "Precision (Beam Size):",
         "lbl_temp": "Temperature:",
         
@@ -128,11 +129,13 @@ TRANSLATIONS = {
         "transcription_language": "Idioma de transcripción:",
         "transcription_auto": "Automático",
 
-        "lbl_autosend": "Enviar Automático (Enter):",
-        "lbl_ai_enabled": "Limpieza con IA:",
-        "lbl_hide_bubble": "Ocultar Burbuja (Modo OpenDeck):",
-        "lbl_auto_pause": "Pausar multimedia al grabar:",
-        "lbl_autostart": "Inicio automático con el sistema:",
+        "lbl_autosend": "Auto-enviar al transcribir",
+        "lbl_ai_enabled": "Limpieza y Formateo con IA",
+        "lbl_hide_bubble": "Ocultar Burbuja de Texto",
+        "lbl_auto_pause": "Auto-pausar Multimedia",
+        "lbl_autostart": "Iniciar con el Sistema",
+        "lbl_notifications": "Mostrar Notificaciones del Sistema",
+        "lbl_vad": "Filtro VAD (Anti-ruido)",
 
         "btn_save_general": "Guardar Configuración General",
         "btn_save_ai": "Guardar Configuración de IA",
