@@ -27,8 +27,10 @@ def main():
         cmd = "toggle-autopause"
     elif "--toggle-bubble" in sys.argv:
         cmd = "toggle-bubble"
+    elif "--toggle-record-send" in sys.argv:
+        cmd = "toggle-record-send"
     else:
-        print("Uso: dictate-client.py [--record|--pause|--cancel|--preview|--finish-normal|--finish-ai|--autosend-activate|--autosend-deactivate|--toggle-autopause|--toggle-bubble]")
+        print("Uso: dictate-client.py [--record|--pause|--cancel|--preview|--finish-normal|--finish-ai|--autosend-activate|--autosend-deactivate|--toggle-autopause|--toggle-bubble|--toggle-record-send]")
         sys.exit(0)
 
     try:

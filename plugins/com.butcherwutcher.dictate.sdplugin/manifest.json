@@ -58,6 +58,24 @@
     },
     {
       "Icon": "icons/plugin",
+      "Name": "Send to AI",
+      "UUID": "com.butcherwutcher.dictate.send_ai",
+      "States": [
+        {"Name": "Disabled", "Image": "icons/plugin"},
+        {"Name": "Enabled", "Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Preview (Paste Raw)",
+      "UUID": "com.butcherwutcher.dictate.preview",
+      "States": [
+        {"Name": "Disabled", "Image": "icons/plugin"},
+        {"Name": "Enabled", "Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
       "Name": "Toggle Auto-Send",
       "UUID": "com.butcherwutcher.dictate.toggle_autosend",
       "States": [

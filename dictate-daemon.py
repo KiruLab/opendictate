@@ -160,12 +160,27 @@ class DictationDaemon:
             logging.error(f"Error obteniendo ventana activa: {e}")
             return "unknown", "unknown"
 
-    def show_error_notification(self, title, message):
-        logging.error(f"{title}: {message}")
+    def export_state(self):
         try:
-            subprocess.Popen(["notify-send", "-u", "critical", title, message])
+            with open("/tmp/dictate_state.json", "w") as f:
+                json.dump({"state": self.state, "model": self.model_size}, f)
         except Exception as e:
-            logging.error(f"Failed to send notification: {e}")
+            logging.error(f"Error exporting state: {e}")
+
+    def show_notification(self, title, message, timeout=1500):
+        try:
+            subprocess.Popen([
+                "notify-send", 
+                "-h", "string:x-canonical-private-synchronous:dictate", 
+                "-t", str(timeout), 
+                title, 
+                message
+            ])
+        except Exception as e:
+            logging.error(f"Error showing notification: {e}")
+
+    def show_error_notification(self, title, message):
+        self.show_notification(title, message, timeout=5000)
 
     def play_sound(self, sound_path):
         if os.path.exists(sound_path):
@@ -517,6 +532,7 @@ class DictationDaemon:
         if hasattr(self, 'ai_check'):
             self.ai_check.set_active(new_state)
         self.export_state()
+        self.show_notification("Dictate Whisper", f"IA: {'Activada' if new_state else 'Desactivada'}")
 
     def action_toggle_autosend(self):
         new_state = not self.config.get("auto_send", False)
@@ -525,6 +541,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(new_state)
         self.export_state()
+        self.show_notification("Dictate Whisper", f"Auto-Enviar: {'Activado' if new_state else 'Desactivado'}")
 
     def action_autosend_activate(self):
         self.config["auto_send"] = True
@@ -532,14 +549,15 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(True)
         self.export_state()
-
+        self.show_notification("Dictate Whisper", "Auto-Enviar: Activado")
+        
     def action_autosend_deactivate(self):
         self.config["auto_send"] = False
         self.save_config()
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(False)
         self.export_state()
-        subprocess.Popen(["notify-send", "Dictate Whisper", "Enviar Automático: Desactivado (Solo pegar)"])
+        self.show_notification("Dictate Whisper", "Auto-Enviar: Desactivado")
 
     def update_tray_status(self, text):
         logging.info(f"State Update: {text}")
@@ -627,13 +645,19 @@ class DictationDaemon:
                 elif data == "toggle-autosend":
                     GLib.idle_add(self.action_toggle_autosend)
                 elif data == "toggle-autopause":
-                    self.config["auto_pause_media"] = not self.config.get("auto_pause_media", True)
+                    val = not self.config.get("auto_pause_media", True)
+                    self.config["auto_pause_media"] = val
                     self.save_config()
                     self.export_state()
+                    GLib.idle_add(self.show_notification, "Dictate Whisper", f"Auto-Pausa Medios: {'Activada' if val else 'Desactivada'}")
                 elif data == "toggle-bubble":
-                    self.config["hide_bubble"] = not self.config.get("hide_bubble", False)
+                    val = not self.config.get("hide_bubble", False)
+                    self.config["hide_bubble"] = val
                     self.save_config()
                     self.export_state()
+                    GLib.idle_add(self.show_notification, "Dictate Whisper", f"Burbuja: {'Oculta' if val else 'Visible'}")
+                elif data == "toggle-record-send":
+                    GLib.idle_add(self.action_toggle_record_send)
                 elif data == "finish-normal":
                     GLib.idle_add(self.action_finish_normal)
                 elif data == "finish-ai":
@@ -698,6 +722,15 @@ class DictationDaemon:
         elif self.state == "PREVIEW":
             # Si estaba en preview ya está limpio (si el LLM estaba prendido globalmente), pero usamos el auto_send.
             self.execute_paste(self.current_text, self.config.get("auto_send", False))
+
+    def action_toggle_record_send(self):
+        if self.state == "IDLE":
+            self.action_record()
+        elif self.state in ["RECORDING", "PAUSED"]:
+            if self.config.get("ai_enabled", False):
+                self.action_finish_ai()
+            else:
+                self.action_finish_normal()
 
     def pause_media(self):
         if not self.config.get("auto_pause_media", True):

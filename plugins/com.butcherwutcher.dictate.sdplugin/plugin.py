@@ -32,10 +32,13 @@ for i in range(len(sys.argv)):
     elif sys.argv[i] == "-info":
         info = sys.argv[i + 1]
 
+# Action context tracking
 active_contexts = {
     "monitor": set(),
     "record": set(),
     "send": set(),
+    "send_ai": set(),
+    "preview": set(),
     "cancel": set(),
     "ai": set(),
     "autosend": set(),
@@ -172,13 +175,6 @@ async def watch_state(ws):
                     "payload": {"state": 1 if autopause_enabled else 0}
                 }))
                 
-            for ctx in active_contexts["bubble"].copy():
-                await ws.send(json.dumps({
-                    "event": "setState",
-                    "context": ctx,
-                    "payload": {"state": 1 if hide_bubble else 0}
-                }))
-                
             # Update Send and Cancel states
             send_usable = 1 if current_state in ["RECORDING", "PAUSED"] else 0
             for ctx in active_contexts["send"].copy():
@@ -187,13 +183,30 @@ async def watch_state(ws):
                     "context": ctx,
                     "payload": {"state": send_usable}
                 }))
-                
-            cancel_usable = 1 if current_state in ["RECORDING", "PAUSED", "TRANSCRIBING"] else 0
+            for ctx in active_contexts["send_ai"].copy():
+                await ws.send(json.dumps({
+                    "event": "setState",
+                    "context": ctx,
+                    "payload": {"state": send_usable}
+                }))
+            for ctx in active_contexts["preview"].copy():
+                await ws.send(json.dumps({
+                    "event": "setState",
+                    "context": ctx,
+                    "payload": {"state": send_usable}
+                }))
             for ctx in active_contexts["cancel"].copy():
                 await ws.send(json.dumps({
                     "event": "setState",
                     "context": ctx,
-                    "payload": {"state": cancel_usable}
+                    "payload": {"state": send_usable}
+                }))
+                
+            for ctx in active_contexts["bubble"].copy():
+                await ws.send(json.dumps({
+                    "event": "setState",
+                    "context": ctx,
+                    "payload": {"state": 1 if hide_bubble else 0}
                 }))
 
         if changed or needs_animation:
@@ -243,6 +256,10 @@ async def connect_streamdeck():
                     active_contexts["record"].add(context)
                 elif act_suffix == "send":
                     active_contexts["send"].add(context)
+                elif act_suffix == "send_ai":
+                    active_contexts["send_ai"].add(context)
+                elif act_suffix == "preview":
+                    active_contexts["preview"].add(context)
                 elif act_suffix == "cancel":
                     active_contexts["cancel"].add(context)
                 elif act_suffix == "toggle_ai":
@@ -341,6 +358,20 @@ async def connect_streamdeck():
                         "context": context,
                         "payload": {"state": send_usable}
                     })))
+                elif act_suffix == "send_ai":
+                    send_usable = 1 if current_state in ["RECORDING", "PAUSED"] else 0
+                    asyncio.create_task(ws.send(json.dumps({
+                        "event": "setState",
+                        "context": context,
+                        "payload": {"state": send_usable}
+                    })))
+                elif act_suffix == "preview":
+                    send_usable = 1 if current_state in ["RECORDING", "PAUSED"] else 0
+                    asyncio.create_task(ws.send(json.dumps({
+                        "event": "setState",
+                        "context": context,
+                        "payload": {"state": send_usable}
+                    })))
                 elif act_suffix == "cancel":
                     cancel_usable = 1 if current_state in ["RECORDING", "PAUSED", "TRANSCRIBING"] else 0
                     asyncio.create_task(ws.send(json.dumps({
@@ -357,6 +388,10 @@ async def connect_streamdeck():
                     active_contexts["record"].remove(context)
                 elif act_suffix == "send" and context in active_contexts["send"]:
                     active_contexts["send"].remove(context)
+                elif act_suffix == "send_ai" and context in active_contexts["send_ai"]:
+                    active_contexts["send_ai"].remove(context)
+                elif act_suffix == "preview" and context in active_contexts["preview"]:
+                    active_contexts["preview"].remove(context)
                 elif act_suffix == "cancel" and context in active_contexts["cancel"]:
                     active_contexts["cancel"].remove(context)
                 elif act_suffix == "toggle_ai" and context in active_contexts["ai"]:
@@ -382,6 +417,10 @@ async def connect_streamdeck():
                     subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--cycle-model"])
                 elif act_suffix == "send":
                     subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--send"])
+                elif act_suffix == "send_ai":
+                    subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--finish-ai"])
+                elif act_suffix == "preview":
+                    subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--preview"])
                 elif act_suffix == "cancel":
                     subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--cancel"])
                 elif act_suffix == "toggle_ai":

@@ -39,6 +39,7 @@ Comandos disponibles usando el binario `dictate`:
 
 | Comando | Descripción |
 |---------|-------------|
+| `dictate --toggle-record-send` | **(Recomendado)** Inicia grabación, reanuda si está en pausa, o termina y envía usando la config de IA activa. |
 | `dictate --record` | Inicia la grabación (o la reanuda si estaba pausada). |
 | `dictate --pause` | Pausa la grabación actual sin enviarla. |
 | `dictate --cancel` | Cancela la grabación actual y descarta el audio. |
@@ -52,8 +53,8 @@ Comandos disponibles usando el binario `dictate`:
 
 **Ejemplo de configuración en GNOME:**
 1. Ve a Configuración > Teclado > Ver y personalizar atajos > Atajos personalizados.
-2. Crea un atajo llamado "Grabar Dictado" con el comando: `dictate --record` y asígnale, por ejemplo, `Ctrl+Alt+R`.
-3. Crea otro atajo llamado "Insertar Dictado" con el comando: `dictate --finish-normal` y asígnale `Ctrl+Alt+F`.
+2. Crea un atajo llamado "Grabar/Enviar Dictado" con el comando: `dictate --toggle-record-send` y asígnale, por ejemplo, `Ctrl+Alt+R`.
+3. Crea un atajo para "Cancelar Dictado" con: `dictate --cancel` y asígnale `Ctrl+Alt+C`.
 
 ---
 
