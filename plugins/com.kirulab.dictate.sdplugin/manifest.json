@@ -3,7 +3,7 @@
     {
       "Icon": "icons/monitor",
       "Name": "Dictate Whisper Monitor",
-      "UUID": "com.butcherwutcher.dictate.monitor",
+      "UUID": "com.kirulab.dictate.monitor",
       "States": [
         {
           "Image": "icons/monitor"
@@ -13,7 +13,7 @@
     {
       "Icon": "icons/record",
       "Name": "Dictate Whisper Record",
-      "UUID": "com.butcherwutcher.dictate.record",
+      "UUID": "com.kirulab.dictate.record",
       "States": [
         {
           "Name": "Idle",
@@ -32,7 +32,7 @@
     {
       "Icon": "icons/send_enabled",
       "Name": "Dictate Whisper Send",
-      "UUID": "com.butcherwutcher.dictate.send",
+      "UUID": "com.kirulab.dictate.send",
       "States": [
         {"Name": "Disabled", "Image": "icons/send_disabled"},
         {"Name": "Enabled", "Image": "icons/send_enabled"}
@@ -41,7 +41,7 @@
     {
       "Icon": "icons/cancel_enabled",
       "Name": "Dictate Whisper Cancel",
-      "UUID": "com.butcherwutcher.dictate.cancel",
+      "UUID": "com.kirulab.dictate.cancel",
       "States": [
         {"Name": "Disabled", "Image": "icons/cancel_disabled"},
         {"Name": "Enabled", "Image": "icons/cancel_enabled"}
@@ -50,7 +50,7 @@
     {
       "Icon": "icons/ai_on",
       "Name": "Toggle AI Cleaning",
-      "UUID": "com.butcherwutcher.dictate.toggle_ai",
+      "UUID": "com.kirulab.dictate.toggle_ai",
       "States": [
         {"Name": "Off", "Image": "icons/ai_off"},
         {"Name": "On", "Image": "icons/ai_on"}
@@ -59,25 +59,25 @@
     {
       "Icon": "icons/send_enabled",
       "Name": "Send to AI",
-      "UUID": "com.butcherwutcher.dictate.send_ai",
+      "UUID": "com.kirulab.dictate.send_ai",
       "States": [
         {"Name": "Disabled", "Image": "icons/send_disabled"},
         {"Name": "Enabled", "Image": "icons/send_enabled"}
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/preview",
       "Name": "Preview (Review)",
-      "UUID": "com.butcherwutcher.dictate.preview",
+      "UUID": "com.kirulab.dictate.preview",
       "States": [
-        {"Name": "Disabled", "Image": "icons/plugin"},
-        {"Name": "Enabled", "Image": "icons/plugin"}
+        {"Name": "Disabled", "Image": "icons/preview"},
+        {"Name": "Enabled", "Image": "icons/preview"}
       ]
     },
     {
       "Icon": "icons/autosend_on",
       "Name": "Toggle Auto-Send",
-      "UUID": "com.butcherwutcher.dictate.toggle_autosend",
+      "UUID": "com.kirulab.dictate.toggle_autosend",
       "States": [
         {"Name": "Off", "Image": "icons/autosend_off"},
         {"Name": "On", "Image": "icons/autosend_on"}
@@ -86,7 +86,7 @@
     {
       "Icon": "icons/media_pause_on",
       "Name": "Toggle Auto-Pause",
-      "UUID": "com.butcherwutcher.dictate.toggle_autopause",
+      "UUID": "com.kirulab.dictate.toggle_autopause",
       "States": [
         {"Name": "Off", "Image": "icons/media_pause_off"},
         {"Name": "On", "Image": "icons/media_pause_on"}
@@ -95,14 +95,14 @@
     {
       "Icon": "icons/bubble_on",
       "Name": "Toggle Bubble Visibility",
-      "UUID": "com.butcherwutcher.dictate.toggle_bubble",
+      "UUID": "com.kirulab.dictate.toggle_bubble",
       "States": [
         {"Name": "Off", "Image": "icons/bubble_off"},
         {"Name": "On", "Image": "icons/bubble_on"}
       ]
     }
   ],
-  "Author": "Butcherwutcher",
+  "Author": "Kirulab",
   "Category": "Dictate Whisper",
   "CategoryIcon": "icons/category",
   "CodePath": "start.sh",

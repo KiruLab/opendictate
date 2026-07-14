@@ -9,6 +9,11 @@ cp dictate-client.py "$INSTALL_DIR/"
 cp dictate_config_ui.py "$INSTALL_DIR/"
 cp -r plugins "$INSTALL_DIR/"
 
+echo "📦 Instalando plugin en OpenDeck..."
+rm -rf "$HOME/.config/opendeck/plugins/com.butcherwutcher.dictate.sdplugin"
+rm -rf "$HOME/.config/opendeck/plugins/com.kirulab.dictate.sdplugin"
+cp -r plugins/com.kirulab.dictate.sdplugin "$HOME/.config/opendeck/plugins/"
+
 chmod +x "$INSTALL_DIR/dictate-daemon.py"
 chmod +x "$INSTALL_DIR/dictate-client.py"
 cp "$INSTALL_DIR/dictate-client.py" "$HOME/.local/bin/dictate"
