@@ -23,6 +23,7 @@ import dbus
 import logging
 import os
 from logging.handlers import RotatingFileHandler
+from i18n import get_translator
 
 LOG_FILE = os.path.expanduser("~/.local/share/dictate-whisper/daemon.log")
 logging.basicConfig(
@@ -61,6 +62,7 @@ class DictationDaemon:
     def __init__(self):
         self.base_dir = os.path.expanduser("~/.local/share/dictate-whisper")
         self.config = self.load_config()
+        self.i18n = get_translator(CONFIG_PATH)
         self.model_size = self.config.get("whisper_model_size", "medium")
         self.model = None
         self.state = "IDLE"  
@@ -260,15 +262,15 @@ class DictationDaemon:
         self.button_box.set_halign(Gtk.Align.CENTER)
         
         btn_close = Gtk.Button(label="❌")
-        btn_close.set_tooltip_text("Cerrar")
+        btn_close.set_tooltip_text(self.i18n.t("close"))
         btn_close.connect("clicked", lambda w: self.action_cancel())
         
         btn_copy = Gtk.Button(label="📋")
-        btn_copy.set_tooltip_text("Copiar al portapapeles")
+        btn_copy.set_tooltip_text(self.i18n.t("copy_clipboard"))
         btn_copy.connect("clicked", self.execute_copy)
         
         btn_insert = Gtk.Button(label="📝")
-        btn_insert.set_tooltip_text("Insertar (según configuración)")
+        btn_insert.set_tooltip_text(self.i18n.t("insert_text"))
         btn_insert.connect("clicked", lambda w: self.action_finish_normal())
         
         self.button_box.pack_start(btn_close, False, False, 0)
@@ -360,13 +362,13 @@ class DictationDaemon:
             
             menu = Gtk.Menu()
             
-            self.status_menu_item = Gtk.MenuItem(label="Cargando modelo...")
+            self.status_menu_item = Gtk.MenuItem(label=self.i18n.t("loading_model"))
             self.status_menu_item.set_sensitive(False)
             menu.append(self.status_menu_item)
             menu.append(Gtk.SeparatorMenuItem())
             
             # Model size submenu
-            model_menu_item = Gtk.MenuItem(label="Modelo Whisper")
+            model_menu_item = Gtk.MenuItem(label=self.i18n.t("whisper_model"))
             model_submenu = Gtk.Menu()
             model_menu_item.set_submenu(model_submenu)
             
@@ -384,12 +386,12 @@ class DictationDaemon:
             menu.append(model_menu_item)
             menu.append(Gtk.SeparatorMenuItem())
             
-            self.auto_send_check = Gtk.CheckMenuItem(label="⏎ Enviar Automático (Enter)")
+            self.auto_send_check = Gtk.CheckMenuItem(label=self.i18n.t("auto_send"))
             self.auto_send_check.set_active(self.config.get("auto_send", False))
             self.auto_send_check.connect("toggled", self.on_auto_send_toggled_from_ui)
             menu.append(self.auto_send_check)
             
-            self.ai_check = Gtk.CheckMenuItem(label="✨ Limpieza con IA")
+            self.ai_check = Gtk.CheckMenuItem(label=self.i18n.t("ai_cleanup"))
             self.ai_check.set_active(self.config.get("ai_enabled", False))
             self.ai_check.connect("toggled", self.on_ai_toggled_from_ui)
             menu.append(self.ai_check)
@@ -400,20 +402,20 @@ class DictationDaemon:
             opendeck_plugin_path = os.path.expanduser("~/.config/opendeck/plugins/com.butcherwutcher.dictate.sdplugin")
             plugin_installed = os.path.exists(opendeck_plugin_path)
             
-            opendeck_label = "✅ OpenDeck: Instalado (Click para Reinstalar/Reconectar)" if plugin_installed else "❌ OpenDeck: No Instalado (Click para Instalar)"
+            opendeck_label = self.i18n.t("opendeck_installed") if plugin_installed else self.i18n.t("opendeck_not_installed")
             item_opendeck = Gtk.MenuItem(label=opendeck_label)
             item_opendeck.connect('activate', self.install_opendeck_plugin)
             menu.append(item_opendeck)
             
             menu.append(Gtk.SeparatorMenuItem())
             
-            item_config = Gtk.MenuItem(label="Configuración...")
+            item_config = Gtk.MenuItem(label=self.i18n.t("settings"))
             item_config.connect('activate', self.open_config_window)
             menu.append(item_config)
             
             menu.append(Gtk.SeparatorMenuItem())
             
-            item_quit = Gtk.MenuItem(label="Salir")
+            item_quit = Gtk.MenuItem(label=self.i18n.t("quit"))
             item_quit.connect('activate', Gtk.main_quit)
             menu.append(item_quit)
             
@@ -444,7 +446,7 @@ class DictationDaemon:
             self.config_window.show_all()
         except Exception as e:
             logging.error(f"Error opening config window: {e}", exc_info=True)
-            self.show_error_notification("Error", "No se pudo abrir la configuración.")
+            self.show_error_notification(self.i18n.t("error"), self.i18n.t("error_opening_config"))
 
     def on_config_window_closed(self, widget):
         self.config_window = None
@@ -492,16 +494,16 @@ class DictationDaemon:
                 subprocess.run(["pkill", "-9", "opendeck"])
                 subprocess.Popen(["/usr/bin/opendeck", "--hide"], start_new_session=True)
                 
-                self.show_error_notification("OpenDeck", "Plugin instalado y OpenDeck reiniciado exitosamente.")
+                self.show_error_notification(self.i18n.t("opendeck"), self.i18n.t("opendeck_installed_success"))
                 
                 # Update menu label
                 if hasattr(self, "indicator"):
-                    widget.set_label("✅ OpenDeck: Instalado (Click para Reinstalar/Reconectar)")
+                    widget.set_label(self.i18n.t("opendeck_installed"))
             else:
-                self.show_error_notification("Error", "No se encontró el plugin fuente para instalar.")
+                self.show_error_notification(self.i18n.t("error"), self.i18n.t("error_plugin_not_found"))
         except Exception as e:
             logging.error(f"Error installing plugin: {e}", exc_info=True)
-            self.show_error_notification("Error", f"No se pudo instalar el plugin: {e}")
+            self.show_error_notification(self.i18n.t("error"), str(e))
 
     def action_send(self):
         if self.config.get("ai_enabled", False):
@@ -532,7 +534,7 @@ class DictationDaemon:
         if hasattr(self, 'ai_check'):
             self.ai_check.set_active(new_state)
         self.export_state()
-        self.show_notification("OpenDictate", f"IA: {'Activada' if new_state else 'Desactivada'}")
+        self.show_notification("OpenDictate", self.i18n.t("ai_enabled") if new_state else self.i18n.t("ai_disabled"))
 
     def action_toggle_autosend(self):
         new_state = not self.config.get("auto_send", False)
@@ -541,7 +543,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(new_state)
         self.export_state()
-        self.show_notification("OpenDictate", f"Auto-Enviar: {'Activado' if new_state else 'Desactivado'}")
+        self.show_notification("OpenDictate", self.i18n.t("autosend_enabled") if new_state else self.i18n.t("autosend_disabled"))
 
     def action_autosend_activate(self):
         self.config["auto_send"] = True
@@ -549,7 +551,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(True)
         self.export_state()
-        self.show_notification("OpenDictate", "Auto-Enviar: Activado")
+        self.show_notification("OpenDictate", self.i18n.t("autosend_enabled"))
         
     def action_autosend_deactivate(self):
         self.config["auto_send"] = False
@@ -557,7 +559,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(False)
         self.export_state()
-        self.show_notification("OpenDictate", "Auto-Enviar: Desactivado")
+        self.show_notification("OpenDictate", self.i18n.t("autosend_disabled"))
 
     def update_tray_status(self, text):
         logging.info(f"State Update: {text}")
@@ -575,7 +577,7 @@ class DictationDaemon:
         old_size = getattr(self, 'model_size', 'medium')
         self.model_size = size
         self.state = "LOADING"
-        self.update_tray_status(f"Cargando {size}...")
+        self.update_tray_status(self.i18n.t("loading_model_param").format(size=size))
         self.export_state()
         
         def loader():
@@ -599,8 +601,8 @@ class DictationDaemon:
     def on_model_error(self, err, old_size):
         self.model_size = old_size
         self.state = "IDLE"
-        self.update_tray_status(f"Error cargando modelo")
-        self.show_error_notification("Error: Modelo Whisper", str(err))
+        self.update_tray_status(self.i18n.t("error_loading_model"))
+        self.show_error_notification(self.i18n.t("error_whisper"), str(err))
         self.export_state()
 
     def on_model_changed(self, radio, size):
@@ -649,13 +651,13 @@ class DictationDaemon:
                     self.config["auto_pause_media"] = val
                     self.save_config()
                     self.export_state()
-                    GLib.idle_add(self.show_notification, "OpenDictate", f"Auto-Pausa Medios: {'Activada' if val else 'Desactivada'}")
+                    GLib.idle_add(self.show_notification, "OpenDictate", self.i18n.t("autopause_enabled") if val else self.i18n.t("autopause_disabled"))
                 elif data == "toggle-bubble":
                     val = not self.config.get("hide_bubble", False)
                     self.config["hide_bubble"] = val
                     self.save_config()
                     self.export_state()
-                    GLib.idle_add(self.show_notification, "OpenDictate", f"Burbuja: {'Oculta' if val else 'Visible'}")
+                    GLib.idle_add(self.show_notification, "OpenDictate", self.i18n.t("bubble_hidden") if val else self.i18n.t("bubble_visible"))
                 elif data == "toggle-record-send":
                     GLib.idle_add(self.action_toggle_record_send)
                 elif data == "finish-normal":
@@ -675,7 +677,7 @@ class DictationDaemon:
             self.record_proc.send_signal(signal.SIGCONT)
             self.state = "RECORDING"
             self.status_icon.set_text("🔴")
-            self.update_tray_status("Grabando...")
+            self.update_tray_status(self.i18n.t("recording"))
             self.export_state()
 
     def action_pause(self):
@@ -684,7 +686,7 @@ class DictationDaemon:
             self.state = "PAUSED"
             self.pause_start_time = time.time()
             self.status_icon.set_text("⏸️")
-            self.update_tray_status("Pausado")
+            self.update_tray_status(self.i18n.t("paused"))
             self.level_bar.set_value(0.0)
             self.export_state()
 
@@ -776,7 +778,7 @@ class DictationDaemon:
         self.pause_media()
         
         self.state = "RECORDING"
-        self.update_tray_status("Grabando...")
+        self.update_tray_status(self.i18n.t("recording"))
         self.play_sound("/usr/share/sounds/freedesktop/stereo/device-added.oga")
         
         self.start_time = time.time()
@@ -1304,7 +1306,7 @@ class DictationDaemon:
             
         self.window.hide()
         self.state = "IDLE"
-        self.update_tray_status(f"Listo ({self.model_size})")
+        self.update_tray_status(self.i18n.t("ready", self.model_size))
         self.export_state()
         return False
 

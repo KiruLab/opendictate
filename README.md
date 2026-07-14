@@ -1,88 +1,90 @@
 # OpenDictate
 
-Un potente y versátil asistente de dictado local para Linux (Wayland/X11) impulsado por `faster-whisper`.
-OpenDictate corre en segundo plano y te permite dictar texto en cualquier aplicación, reescribirlo usando Inteligencia Artificial (Gemma/Gemini), y controlar todo mediante atajos de teclado o desde un Elgato Stream Deck usando **OpenDeck**.
+A powerful and versatile local dictation assistant for Linux (Wayland/X11) powered by `faster-whisper`.
+OpenDictate runs in the background and allows you to dictate text into any application, rewrite it using Artificial Intelligence (Gemma/Gemini), and control everything via keyboard shortcuts or an Elgato Stream Deck using **OpenDeck**.
 
-## Características Principales
+## 🌍 Multilingual Capabilities
+Thanks to the robust architecture of OpenAI's Whisper models, OpenDictate natively supports multilingual transcription. You can dictate in English, Spanish, French, German, Italian, Portuguese, and many other languages. The tool allows you to:
+- Automatically detect the spoken language.
+- Force transcription into a specific language for improved accuracy.
+- Translate your voice from any supported language into English on the fly.
 
-* **100% Local y Privado**: Utiliza modelos de Whisper que corren en tu propia máquina.
-* **Integración con IA (Opcional)**: Transcribe y reescribe tu texto usando Google Gemini (API).
-* **Control Inteligente de Medios**: Pausa tu música o podcasts automáticamente cuando empiezas a grabar.
-* **Perfiles por Aplicación**: Define comportamientos de copiado/pegado específicos para cada programa (útil para la terminal, editores de código o navegadores).
-* **Burbuja Flotante**: Retroalimentación visual inmediata mientras hablas.
-* **Integración con OpenDeck**: Plugin nativo para controlar la grabación, la IA y los ajustes desde tu Stream Deck.
+## 🚀 Key Features
+
+* **100% Local and Private**: Uses Whisper models running entirely on your local machine.
+* **AI Integration (Optional)**: Transcribe and rewrite your text using Google Gemini (API).
+* **Smart Media Control**: Automatically pauses your music or podcasts when you start recording and resumes when finished.
+* **Per-App Profiles**: Define specific copy/paste behaviors for each program (useful for terminal, code editors, or browsers).
+* **Floating Bubble**: Immediate visual feedback while you speak.
+* **OpenDeck Integration**: Native plugin to control recording, AI, and settings directly from your Stream Deck.
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
-1. Clona el repositorio:
+1. Clone the repository:
    ```bash
-   git clone https://github.com/tu-usuario/dictate-whisper.git
-   cd dictate-whisper
+   git clone https://github.com/KiruLab/opendictate.git
+   cd opendictate
    ```
-2. Ejecuta el script de instalación:
+2. Run the installation script:
    ```bash
    ./install.sh
    ```
-   *El script instalará las dependencias necesarias de Ubuntu (xdotool, wl-clipboard, libayatana, etc.), creará un entorno virtual en `~/.local/share/dictate-whisper` y descargará los paquetes de Python.*
+   *The script will install the required Ubuntu dependencies (xdotool, wl-clipboard, libayatana, etc.), create a virtual environment in `~/.local/share/dictate-whisper` and download the Python packages.*
 
-3. La aplicación de configuración gráfica se abrirá automáticamente. Allí podrás configurar tu API Key (si deseas usar IA), el modelo de Whisper, y los perfiles de tus aplicaciones.
+3. You can find the app shortcut in your application drawer. Open it to access the Settings UI where you can configure your API Key, Whisper model, languages, and app profiles.
 
 ---
 
-## ⌨️ Uso con Atajos de Teclado (CLI)
+## ⌨️ Usage with Keyboard Shortcuts (CLI)
 
-Si no tienes un Stream Deck, puedes controlar OpenDictate asignando comandos a los atajos de teclado de tu entorno de escritorio (GNOME, KDE, Hyprland, etc.).
+If you don't have a Stream Deck, you can control OpenDictate by assigning commands to your desktop environment's keyboard shortcuts (GNOME, KDE, Hyprland, etc.).
 
-Comandos disponibles usando el binario `dictate`:
+Available commands using the `dictate` binary:
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| `dictate --toggle-record-send` | **(Recomendado)** Inicia grabación, reanuda si está en pausa, o termina y envía usando la config de IA activa. |
-| `dictate --record` | Inicia la grabación (o la reanuda si estaba pausada). |
-| `dictate --pause` | Pausa la grabación actual sin enviarla. |
-| `dictate --cancel` | Cancela la grabación actual y descarta el audio. |
-| `dictate --preview` | Detiene la grabación y mantiene el texto en la burbuja para revisión. |
-| `dictate --finish-normal` | Termina la grabación y la inserta como texto normal. |
-| `dictate --finish-ai` | Termina la grabación, la procesa por la IA (Gemma/Gemini) y luego la inserta. |
-| `dictate --send` | Simula la tecla "Enter" luego de pegar el texto. |
-| `dictate --toggle-autosend` | Activa/Desactiva el auto-envío (Enter automático) de forma global. |
-| `dictate --toggle-autopause` | Activa/Desactiva el pausado automático de música durante la grabación. |
-| `dictate --toggle-bubble` | Oculta/Muestra la burbuja flotante en pantalla. |
-
-**Ejemplo de configuración en GNOME:**
-1. Ve a Configuración > Teclado > Ver y personalizar atajos > Atajos personalizados.
-2. Crea un atajo llamado "Grabar/Enviar Dictado" con el comando: `dictate --toggle-record-send` y asígnale, por ejemplo, `Ctrl+Alt+R`.
-3. Crea un atajo para "Cancelar Dictado" con: `dictate --cancel` y asígnale `Ctrl+Alt+C`.
+| `dictate --toggle-record-send` | **(Recommended)** Starts recording, resumes if paused, or finishes and sends using the active AI config. |
+| `dictate --record` | Starts recording (or resumes if paused). |
+| `dictate --pause` | Pauses the current recording without sending. |
+| `dictate --cancel` | Cancels the current recording and discards the audio. |
+| `dictate --preview` | Stops the recording and keeps the text in the bubble for review. |
+| `dictate --send` | Simulates the "Enter" key after pasting the text. |
+| `dictate --toggle-ai` | Toggles the AI rewriting feature on or off. |
+| `dictate --toggle-autosend` | Toggles the global auto-send (automatic Enter). |
+| `dictate --toggle-autopause` | Toggles automatic pausing of media during recording. |
+| `dictate --toggle-bubble` | Hides/Shows the floating feedback bubble. |
 
 ---
 
-## 🎛️ Uso con OpenDeck (Stream Deck)
+## 🎛️ Usage with OpenDeck (Stream Deck)
 
-OpenDictate incluye un plugin completo para **OpenDeck**, ideal para tener botones físicos con retroalimentación visual en tiempo real.
+OpenDictate includes a full plugin for **OpenDeck**, perfect for having physical buttons with real-time visual feedback.
 
-### Instalación del Plugin OpenDeck
+### OpenDeck Plugin Installation
 
-1. Asegúrate de tener [OpenDeck](https://github.com/viktorgino/OpenDeck) instalado y corriendo.
-2. El script `install.sh` ya habrá copiado el plugin a tu carpeta de plugins de OpenDeck (`~/.local/share/OpenDeck/plugins/`).
-3. **Reinicia la aplicación OpenDeck**.
-4. En la interfaz de configuración de OpenDeck, busca la categoría **"OpenDictate"**.
+1. Make sure you have [OpenDeck](https://github.com/viktorgino/OpenDeck) installed and running.
+2. The `install.sh` script automatically copies the plugin to your OpenDeck configuration folder.
+3. **Restart the OpenDeck application**.
+4. In the OpenDeck configuration interface, look for the **"OpenDictate"** category.
 
-### Acciones Disponibles en OpenDeck
+### Available Actions in OpenDeck
 
-* **Record / Pause / Resume**: Un botón dinámico que cambia de color y estado según si estás grabando, en pausa o inactivo.
-* **Cancel Recording**: Cancela la grabación en curso.
-* **Send (Raw Text)**: Finaliza la grabación y pega el texto crudo.
-* **Send to AI**: Finaliza la grabación, la procesa mediante IA y la pega en la aplicación activa.
-* **Toggle Auto-Send**: Enciende o apaga el envío automático global (Enter automático tras pegar).
-* **Toggle AI**: Activa o desactiva la sugerencia inteligente de usar la IA basándose en el contexto visual de la pantalla.
-* **Toggle Auto-Pause**: Activa o desactiva la pausa automática de tus medios (Spotify, VLC) al grabar.
-* **Toggle Bubble Visibility**: Activa o desactiva la burbuja flotante de retroalimentación.
+* **Record**: A dynamic button that changes color and state depending on whether you are recording, paused, or idle.
+* **Cancel**: Cancels the ongoing recording.
+* **Send**: Finishes the recording and pastes the text (uses AI if enabled by the toggle).
+* **Monitor**: Empty button used to monitor daemon status.
+* **Toggle Auto-Send**: Turns the global auto-send on or off.
+* **Toggle AI Cleaning**: Turns the AI rewriting feature on or off.
+* **Toggle Auto-Pause**: Turns automatic media pausing on or off.
+* **Toggle Bubble Visibility**: Turns the floating feedback bubble on or off.
+* **Preview (Review)**: Keeps the transcribed text in the bubble for review.
 
 ---
 
-## ⚖️ Licencia y Créditos
+## ⚖️ License and Credits
 
-* Los iconos visuales utilizados en esta aplicación y en el plugin de OpenDeck fueron provistos por [Icons8](https://icons8.com) bajo la Licencia Gratuita de Icons8.
-* Desarrollado para uso libre.
+* **License**: Released under the MIT License. Copyright (c) 2026 Kirulab / Tomás D. López.
+* The visual icons used in this application and the OpenDeck plugin were provided by [Icons8](https://icons8.com) under the Icons8 Free License.
+* Uses `faster-whisper` (MIT) and Google Gemini API (Apache 2.0).
