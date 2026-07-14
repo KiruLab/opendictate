@@ -1,0 +1,97 @@
+{
+  "Actions": [
+    {
+      "Icon": "icons/monitor",
+      "Name": "Dictate Whisper Monitor",
+      "UUID": "com.butcherwutcher.dictate.monitor",
+      "States": [
+        {
+          "Image": "icons/monitor"
+        }
+      ]
+    },
+    {
+      "Icon": "icons/record_idle",
+      "Name": "Dictate Whisper Record",
+      "UUID": "com.butcherwutcher.dictate.record",
+      "States": [
+        {
+          "Name": "Idle",
+          "Image": "icons/record_idle"
+        },
+        {
+          "Name": "Recording",
+          "Image": "icons/record_active"
+        },
+        {
+          "Name": "Paused",
+          "Image": "icons/record_paused"
+        }
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Dictate Whisper Send",
+      "UUID": "com.butcherwutcher.dictate.send",
+      "States": [
+        {"Image": "icons/plugin"},
+        {"Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Dictate Whisper Cancel",
+      "UUID": "com.butcherwutcher.dictate.cancel",
+      "States": [
+        {"Image": "icons/plugin"},
+        {"Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Toggle AI Cleaning",
+      "UUID": "com.butcherwutcher.dictate.toggle_ai",
+      "States": [
+        {"Name": "Off", "Image": "icons/plugin"},
+        {"Name": "On", "Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Toggle Auto-Send",
+      "UUID": "com.butcherwutcher.dictate.toggle_autosend",
+      "States": [
+        {"Name": "Off", "Image": "icons/plugin"},
+        {"Name": "On", "Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Toggle Auto-Pause",
+      "UUID": "com.butcherwutcher.dictate.toggle_autopause",
+      "States": [
+        {"Name": "Off", "Image": "icons/plugin"},
+        {"Name": "On", "Image": "icons/plugin"}
+      ]
+    },
+    {
+      "Icon": "icons/plugin",
+      "Name": "Toggle Bubble Visibility",
+      "UUID": "com.butcherwutcher.dictate.toggle_bubble",
+      "States": [
+        {"Name": "Off", "Image": "icons/plugin"},
+        {"Name": "On", "Image": "icons/plugin"}
+      ]
+    }
+  ],
+  "Author": "Butcherwutcher",
+  "Category": "Dictate Whisper",
+  "CategoryIcon": "icons/category",
+  "CodePath": "start.sh",
+  "Description": "Control and monitor Dictate Whisper.",
+  "Name": "Dictate Whisper",
+  "Icon": "icons/plugin",
+  "OS": [{"Platform": "linux", "MinimumVersion": "1.0"}],
+  "Software": {"MinimumVersion": "5.0"},
+  "Version": "1.0"
+}

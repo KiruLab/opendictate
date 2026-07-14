@@ -1,0 +1,372 @@
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib
+import sqlite3
+import json
+import os
+
+class ConfigWindow(Gtk.Window):
+    def __init__(self, db_path, config_path, on_config_saved=None):
+        super().__init__(title="Configuración - Dictate Whisper")
+        self.set_default_size(650, 450)
+        self.set_position(Gtk.WindowPosition.CENTER)
+        
+        self.db_path = db_path
+        self.config_path = config_path
+        self.on_config_saved = on_config_saved
+        
+        self.config = self.load_config()
+        
+        notebook = Gtk.Notebook()
+        self.add(notebook)
+        
+        # Tab 1: General
+        general_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        general_box.set_border_width(15)
+        notebook.append_page(general_box, Gtk.Label(label="General"))
+        
+        switch_box2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_auto_send = Gtk.Label(label="Enviar Automático (Enter):")
+        self.auto_send_switch = Gtk.Switch()
+        self.auto_send_switch.set_active(self.config.get("auto_send", False))
+        switch_box2.pack_start(lbl_auto_send, False, False, 0)
+        switch_box2.pack_start(self.auto_send_switch, False, False, 0)
+        general_box.pack_start(switch_box2, False, False, 0)
+
+        switch_box3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_ai_enabled = Gtk.Label(label="Limpieza con IA:")
+        self.ai_enabled_switch = Gtk.Switch()
+        self.ai_enabled_switch.set_active(self.config.get("ai_enabled", False))
+        switch_box3.pack_start(lbl_ai_enabled, False, False, 0)
+        switch_box3.pack_start(self.ai_enabled_switch, False, False, 0)
+        general_box.pack_start(switch_box3, False, False, 0)
+        
+        switch_box4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_hide_bubble = Gtk.Label(label="Ocultar Burbuja (Modo OpenDeck):")
+        self.hide_bubble_switch = Gtk.Switch()
+        self.hide_bubble_switch.set_active(self.config.get("hide_bubble", False))
+        switch_box4.pack_start(lbl_hide_bubble, False, False, 0)
+        switch_box4.pack_start(self.hide_bubble_switch, False, False, 0)
+        general_box.pack_start(switch_box4, False, False, 0)
+
+        switch_box5 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_auto_pause = Gtk.Label(label="Pausar multimedia al grabar:")
+        self.auto_pause_switch = Gtk.Switch()
+        self.auto_pause_switch.set_active(self.config.get("auto_pause_media", True))
+        switch_box5.pack_start(lbl_auto_pause, False, False, 0)
+        switch_box5.pack_start(self.auto_pause_switch, False, False, 0)
+        general_box.pack_start(switch_box5, False, False, 0)
+        save_gen_btn = Gtk.Button(label="Guardar Configuración General")
+        save_gen_btn.connect("clicked", self.save_general)
+        general_box.pack_start(save_gen_btn, False, False, 10)
+        
+        # Tab 2: IA / LLM
+        ia_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        ia_box.set_border_width(15)
+        notebook.append_page(ia_box, Gtk.Label(label="Inteligencia Artificial"))
+        
+        ia_box.pack_start(Gtk.Label(label="API Key (Gemini/Gemma):", xalign=0), False, False, 0)
+        self.api_key_entry = Gtk.Entry()
+        self.api_key_entry.set_text(self.config.get("api_key", ""))
+        self.api_key_entry.set_visibility(False)
+        ia_box.pack_start(self.api_key_entry, False, False, 0)
+        
+        ia_box.pack_start(Gtk.Label(label="Modelo LLM:", xalign=0), False, False, 0)
+        self.model_entry = Gtk.Entry()
+        self.model_entry.set_text(self.config.get("model", "gemma-4"))
+        ia_box.pack_start(self.model_entry, False, False, 0)
+
+        ia_box.pack_start(Gtk.Label(label="Instrucción Base Global (System Prompt):", xalign=0), False, False, 0)
+        self.base_prompt_view = Gtk.TextView()
+        self.base_prompt_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        
+        default_base_prompt = "Eres un asistente de dictado en tiempo real.\nTu objetivo es limpiar el siguiente texto dictado por voz, corrigiendo errores obvios de reconocimiento de voz y puntuación, pero manteniéndolo lo más fiel posible al original.\nSi el texto incluye instrucciones verbales sobre formato (ej. 'abre paréntesis', 'nueva línea', 'coma', 'punto'), aplícalas.\nUtiliza las mayúsculas cuando corresponda y corrige las palabras homófonas según el contexto para darle sentido al texto sin cambiar las palabras originales ni agregar texto extra.\nDevuelve ÚNICAMENTE el texto corregido, sin saludos ni explicaciones."
+        self.base_prompt_view.get_buffer().set_text(self.config.get("base_system_prompt", default_base_prompt))
+        
+        scroll_base_prompt = Gtk.ScrolledWindow()
+        scroll_base_prompt.add(self.base_prompt_view)
+        ia_box.pack_start(scroll_base_prompt, True, True, 0)
+        
+        save_ia_btn = Gtk.Button(label="Guardar Configuración de IA")
+        save_ia_btn.connect("clicked", self.save_general)
+        ia_box.pack_start(save_ia_btn, False, False, 10)
+        
+        # Tab 3: Perfiles por Aplicación
+        profiles_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        profiles_box.set_border_width(15)
+        notebook.append_page(profiles_box, Gtk.Label(label="Perfiles (Apps)"))
+        
+        # Left side: List of profiles
+        left_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        profiles_box.pack_start(left_box, False, False, 0)
+        
+        self.listbox = Gtk.ListBox()
+        self.listbox.connect("row-selected", self.on_app_selected)
+        scroll_list = Gtk.ScrolledWindow()
+        scroll_list.set_size_request(200, -1)
+        scroll_list.add(self.listbox)
+        left_box.pack_start(scroll_list, True, True, 0)
+        
+        add_btn = Gtk.Button(label="Añadir App")
+        add_btn.connect("clicked", self.on_add_app)
+        left_box.pack_start(add_btn, False, False, 0)
+        
+        # Right side: Profile editor
+        right_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        profiles_box.pack_start(right_box, True, True, 0)
+        
+        self.current_app_label = Gtk.Label(label="Selecciona una aplicación", xalign=0)
+        self.current_app_label.set_markup("<b>Selecciona una aplicación</b>")
+        right_box.pack_start(self.current_app_label, False, False, 0)
+        
+        right_box.pack_start(Gtk.Label(label="Instrucción al modelo (System Prompt):", xalign=0), False, False, 0)
+        self.prompt_view = Gtk.TextView()
+        self.prompt_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        scroll_prompt = Gtk.ScrolledWindow()
+        scroll_prompt.add(self.prompt_view)
+        right_box.pack_start(scroll_prompt, True, True, 0)
+        
+        self.vision_switch = Gtk.CheckButton(label="Habilitar Visión (Pantallazo) para esta app")
+        right_box.pack_start(self.vision_switch, False, False, 0)
+        
+        btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        save_prof_btn = Gtk.Button(label="Guardar Perfil")
+        save_prof_btn.connect("clicked", self.save_current_profile)
+        del_prof_btn = Gtk.Button(label="Eliminar")
+        del_prof_btn.connect("clicked", self.delete_current_profile)
+        btn_box.pack_start(save_prof_btn, True, True, 0)
+        btn_box.pack_start(del_prof_btn, False, False, 0)
+        right_box.pack_start(btn_box, False, False, 0)
+        
+        self.current_selected_app = None
+        self.load_profiles()
+        
+        # Tab 4: Avanzado
+        adv_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        adv_box.set_border_width(15)
+        notebook.append_page(adv_box, Gtk.Label(label="Avanzado (Whisper)"))
+
+        vad_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_vad = Gtk.Label(label="Filtro VAD (Ignorar silencios):")
+        self.vad_switch = Gtk.Switch()
+        self.vad_switch.set_active(self.config.get("vad_filter", False))
+        vad_box.pack_start(lbl_vad, False, False, 0)
+        vad_box.pack_start(self.vad_switch, False, False, 0)
+        adv_box.pack_start(vad_box, False, False, 0)
+
+        lang_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_lang = Gtk.Label(label="Idioma forzado:")
+        self.lang_combo = Gtk.ComboBoxText()
+        self.lang_combo.append("auto", "Automático")
+        self.lang_combo.append("es", "Español")
+        self.lang_combo.append("en", "Inglés")
+        self.lang_combo.set_active_id(self.config.get("language", "auto"))
+        lang_box.pack_start(lbl_lang, False, False, 0)
+        lang_box.pack_start(self.lang_combo, False, False, 0)
+        adv_box.pack_start(lang_box, False, False, 0)
+
+        beam_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_beam = Gtk.Label(label="Precisión (Beam Size):")
+        self.beam_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, 10, 1)
+        self.beam_scale.set_value(self.config.get("beam_size", 5))
+        self.beam_scale.set_digits(0)
+        beam_box.pack_start(lbl_beam, False, False, 0)
+        beam_box.pack_start(self.beam_scale, True, True, 0)
+        adv_box.pack_start(beam_box, False, False, 0)
+
+        temp_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_temp = Gtk.Label(label="Temperatura:")
+        self.temp_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 1.0, 0.1)
+        self.temp_scale.set_value(self.config.get("temperature", 0.0))
+        self.temp_scale.set_digits(1)
+        temp_box.pack_start(lbl_temp, False, False, 0)
+        temp_box.pack_start(self.temp_scale, True, True, 0)
+        adv_box.pack_start(temp_box, False, False, 0)
+
+        save_adv_btn = Gtk.Button(label="Guardar Configuración Avanzada")
+        save_adv_btn.connect("clicked", self.save_general)
+        adv_box.pack_start(save_adv_btn, False, False, 10)
+        
+        self.show_all()
+        
+    def load_config(self):
+        if os.path.exists(self.config_path):
+            with open(self.config_path, "r") as f:
+                return json.load(f)
+        return {}
+
+    def save_general(self, btn):
+        self.config["auto_send"] = self.auto_send_switch.get_active()
+        self.config["ai_enabled"] = self.ai_enabled_switch.get_active()
+        self.config["hide_bubble"] = self.hide_bubble_switch.get_active()
+        self.config["auto_pause_media"] = self.auto_pause_switch.get_active()
+        
+        # Guardar Model Settings
+        self.config["api_key"] = self.api_key_entry.get_text().strip()
+        self.config["model"] = self.model_entry.get_text().strip()
+        
+        # Guardar Configuración Avanzada si existen los widgets
+        if hasattr(self, 'vad_switch'):
+            self.config["vad_filter"] = self.vad_switch.get_active()
+            self.config["language"] = self.lang_combo.get_active_id()
+            self.config["beam_size"] = int(self.beam_scale.get_value())
+            self.config["temperature"] = float(self.temp_scale.get_value())
+        
+        buf = self.base_prompt_view.get_buffer()
+        start, end = buf.get_bounds()
+        self.config["base_system_prompt"] = buf.get_text(start, end, True).strip()
+        
+        with open(self.config_path, "w") as f:
+            json.dump(self.config, f, indent=4)
+        if self.on_config_saved:
+            self.on_config_saved()
+        self.show_message("Guardado", "Configuración general guardada exitosamente.")
+
+    def load_profiles(self):
+        for child in self.listbox.get_children():
+            self.listbox.remove(child)
+            
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT app_class FROM app_profiles")
+            for row in cursor.fetchall():
+                row_widget = Gtk.ListBoxRow()
+                lbl = Gtk.Label(label=row[0], xalign=0, margin=10)
+                row_widget.add(lbl)
+                row_widget.app_class = row[0]
+                self.listbox.add(row_widget)
+            conn.close()
+            self.listbox.show_all()
+        except Exception as e:
+            print("Error loading profiles:", e)
+
+    def on_app_selected(self, listbox, row):
+        if not row:
+            self.current_selected_app = None
+            self.current_app_label.set_markup("<b>Selecciona una aplicación</b>")
+            self.prompt_view.get_buffer().set_text("")
+            self.vision_switch.set_active(False)
+            return
+            
+        self.current_selected_app = row.app_class
+        self.current_app_label.set_markup(f"<b>Perfil: {self.current_selected_app}</b>")
+        
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT system_prompt, enable_vision FROM app_profiles WHERE app_class = ?", (self.current_selected_app,))
+            data = cursor.fetchone()
+            conn.close()
+            
+            if data:
+                self.prompt_view.get_buffer().set_text(data[0] if data[0] else "")
+                self.vision_switch.set_active(bool(data[1]))
+        except Exception as e:
+            print("Error loading profile details:", e)
+
+    def get_open_apps(self):
+        apps = set()
+        try:
+            import pyatspi
+            desktop = pyatspi.Registry.getDesktop(0)
+            for app in desktop:
+                if not app: continue
+                if app.name:
+                    window_name = ""
+                    for window in app:
+                        if window and window.name:
+                            window_name = window.name
+                            break
+                    if window_name:
+                        apps.add(f"{window_name} [{app.name}]")
+                    else:
+                        apps.add(f"{app.name} [{app.name}]")
+        except Exception:
+            pass
+        return sorted(list(apps))
+
+    def on_add_app(self, btn):
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.OK_CANCEL,
+            text="Nueva Aplicación"
+        )
+        dialog.format_secondary_text("Selecciona una aplicación abierta o escribe su identificador:")
+        
+        combo = Gtk.ComboBoxText.new_with_entry()
+        for app in self.get_open_apps():
+            combo.append_text(app)
+            
+        dialog.get_message_area().pack_start(combo, False, False, 0)
+        dialog.show_all()
+        
+        response = dialog.run()
+        raw_text = combo.get_child().get_text().strip()
+        dialog.destroy()
+        
+        app_name = raw_text
+        if raw_text:
+            import re
+            match = re.search(r'\[(.*?)\]$', raw_text)
+            if match:
+                app_name = match.group(1).strip()
+        
+        if response == Gtk.ResponseType.OK and app_name:
+            try:
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                cursor.execute("INSERT OR IGNORE INTO app_profiles (app_class, system_prompt, enable_vision) VALUES (?, '', 0)", (app_name,))
+                conn.commit()
+                conn.close()
+                self.load_profiles()
+            except Exception as e:
+                self.show_message("Error al añadir aplicación", str(e))
+
+    def save_current_profile(self, btn):
+        if not self.current_selected_app:
+            return
+            
+        buffer = self.prompt_view.get_buffer()
+        start, end = buffer.get_bounds()
+        prompt = buffer.get_text(start, end, True).strip()
+        vision = 1 if self.vision_switch.get_active() else 0
+        
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE app_profiles SET system_prompt = ?, enable_vision = ? WHERE app_class = ?", (prompt, vision, self.current_selected_app))
+            conn.commit()
+            conn.close()
+            self.show_message("Guardado", f"Perfil de {self.current_selected_app} guardado exitosamente.")
+        except Exception as e:
+            self.show_message("Error", str(e))
+
+    def delete_current_profile(self, btn):
+        if not self.current_selected_app:
+            return
+            
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM app_profiles WHERE app_class = ?", (self.current_selected_app,))
+            conn.commit()
+            conn.close()
+            self.load_profiles()
+            self.on_app_selected(self.listbox, None)
+        except Exception as e:
+            self.show_message("Error", str(e))
+
+    def show_message(self, title, message):
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text=title
+        )
+        dialog.format_secondary_text(message)
+        dialog.run()
+        dialog.destroy()
