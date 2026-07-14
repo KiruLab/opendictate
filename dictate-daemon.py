@@ -1135,7 +1135,10 @@ class DictationDaemon:
             from google.genai import types
             
             char_count = len(text)
-            timeout_ms = int(max(120.0, (char_count / 1000.0) * 120.0) * 1000)
+            default_timeout = int(max(120.0, (char_count / 1000.0) * 120.0) * 1000)
+            timeout_ms = int(self.config.get("llm_timeout", 120)) * 1000
+            if timeout_ms < default_timeout:
+                timeout_ms = default_timeout
             
             client = genai.Client(
                 api_key=self.config["api_key"].strip(),
@@ -1208,7 +1211,10 @@ class DictationDaemon:
             
             response = client.models.generate_content_stream(
                 model=self.config.get("model", "gemma-4"),
-                contents=prompt_parts
+                contents=prompt_parts,
+                config=types.GenerateContentConfig(
+                    temperature=float(self.config.get("llm_temperature", 0.7))
+                )
             )
             
             cleaned_text = ""

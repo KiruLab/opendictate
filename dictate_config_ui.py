@@ -102,6 +102,28 @@ class ConfigWindow(Gtk.Window):
         self.model_entry.set_text(self.config.get("model", "gemma-4"))
         self.model_entry.connect("focus-out-event", self.auto_save)
         ia_box.pack_start(self.model_entry, False, False, 0)
+        
+        # Timeout and Temperature horizontally
+        ia_settings_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=20)
+        
+        timeout_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        timeout_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_llm_timeout"), xalign=0), False, False, 0)
+        self.llm_timeout_spin = Gtk.SpinButton.new_with_range(30, 600, 10)
+        self.llm_timeout_spin.set_value(self.config.get("llm_timeout", 120))
+        self.llm_timeout_spin.connect("value-changed", self.auto_save)
+        timeout_box.pack_start(self.llm_timeout_spin, False, False, 0)
+        ia_settings_box.pack_start(timeout_box, True, True, 0)
+        
+        temp_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        temp_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_llm_temp"), xalign=0), False, False, 0)
+        self.llm_temp_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 2.0, 0.1)
+        self.llm_temp_scale.set_value(self.config.get("llm_temperature", 0.7))
+        self.llm_temp_scale.set_value_pos(Gtk.PositionType.RIGHT)
+        self.llm_temp_scale.connect("value-changed", self.auto_save)
+        temp_box.pack_start(self.llm_temp_scale, False, False, 0)
+        ia_settings_box.pack_start(temp_box, True, True, 0)
+        
+        ia_box.pack_start(ia_settings_box, False, False, 0)
 
         ia_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_sys_prompt"), xalign=0), False, False, 0)
         self.base_prompt_view = Gtk.TextView()
@@ -252,6 +274,10 @@ class ConfigWindow(Gtk.Window):
         self.api_key_entry.set_text(self.config.get("api_key", ""))
         self.model_entry.set_text(self.config.get("model", "gemma-4"))
         
+        if hasattr(self, 'llm_timeout_spin'):
+            self.llm_timeout_spin.set_value(self.config.get("llm_timeout", 120))
+            self.llm_temp_scale.set_value(self.config.get("llm_temperature", 0.7))
+        
         if hasattr(self, 'vad_switch'):
             self.vad_switch.set_active(self.config.get("vad_filter", False))
             self.lang_combo.set_active_id(self.config.get("language", "auto"))
@@ -303,6 +329,9 @@ Icon=audio-input-microphone
         # Guardar Model Settings
         self.config["api_key"] = self.api_key_entry.get_text().strip()
         self.config["model"] = self.model_entry.get_text().strip()
+        if hasattr(self, 'llm_timeout_spin'):
+            self.config["llm_timeout"] = int(self.llm_timeout_spin.get_value())
+            self.config["llm_temperature"] = float(self.llm_temp_scale.get_value())
         
         # Guardar Configuración Avanzada si existen los widgets
         if hasattr(self, 'vad_switch'):

@@ -65,6 +65,8 @@ TRANSLATIONS = {
         "lbl_api_key": "API Key:",
         "lbl_model": "Model (Gemini):",
         "lbl_sys_prompt": "System Prompt:",
+        "lbl_llm_timeout": "Timeout (seconds):",
+        "lbl_llm_temp": "Temperature (Creativity):",
         
         "lbl_whisper_model": "Whisper Model:",
         "lbl_beam": "Precision (Beam Size):",
@@ -145,6 +147,8 @@ TRANSLATIONS = {
         "lbl_api_key": "API Key:",
         "lbl_model": "Modelo (Gemini):",
         "lbl_sys_prompt": "Prompt del Sistema:",
+        "lbl_llm_timeout": "Tiempo de espera (segundos):",
+        "lbl_llm_temp": "Temperatura (Creatividad):",
 
         "lbl_whisper_model": "Modelo de Whisper:",
         "lbl_vad": "Filtro VAD (Ignorar silencios):",
@@ -226,6 +230,8 @@ TRANSLATIONS = {
         "lbl_api_key": "API-Schlüssel:",
         "lbl_model": "Modell (Gemini):",
         "lbl_sys_prompt": "System-Prompt:",
+        "lbl_llm_timeout": "Zeitüberschreitung (Sekunden):",
+        "lbl_llm_temp": "Temperatur (Kreativität):",
         
         "lbl_whisper_model": "Whisper-Modell:",
         "lbl_vad": "VAD-Filter (Ignorieren):",
@@ -307,6 +313,8 @@ TRANSLATIONS = {
         "lbl_api_key": "Clé API :",
         "lbl_model": "Modèle (Gemini) :",
         "lbl_sys_prompt": "Prompt Système :",
+        "lbl_llm_timeout": "Délai d'attente (secondes) :",
+        "lbl_llm_temp": "Température (Créativité) :",
         
         "lbl_whisper_model": "Modèle Whisper :",
         "lbl_vad": "Filtre VAD (Ignorer silences) :",
