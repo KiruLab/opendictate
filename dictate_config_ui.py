@@ -7,13 +7,16 @@ import os
 from i18n import get_translator
 
 class ConfigWindow(Gtk.Window):
-    def __init__(self, db_path, config_path, on_config_saved=None):
+    def __init__(self, db_path, config_path, on_config_saved=None, daemon_ref=None):
         self.db_path = db_path
         self.config_path = config_path
         self.on_config_saved = on_config_saved
+        self.daemon_ref = daemon_ref
         
         self.config = self.load_config()
         self.i18n = get_translator(self.config_path)
+        
+        self._updating_ui = False
 
         super().__init__(title=self.i18n.t("settings_title"))
         self.set_default_size(650, 450)
@@ -31,6 +34,7 @@ class ConfigWindow(Gtk.Window):
         lbl_auto_send = Gtk.Label(label=self.i18n.t("lbl_autosend"))
         self.auto_send_switch = Gtk.Switch()
         self.auto_send_switch.set_active(self.config.get("auto_send", False))
+        self.auto_send_switch.connect("notify::active", self.auto_save)
         switch_box2.pack_start(lbl_auto_send, False, False, 0)
         switch_box2.pack_start(self.auto_send_switch, False, False, 0)
         general_box.pack_start(switch_box2, False, False, 0)
@@ -39,6 +43,7 @@ class ConfigWindow(Gtk.Window):
         lbl_ai_enabled = Gtk.Label(label=self.i18n.t("lbl_ai_enabled"))
         self.ai_enabled_switch = Gtk.Switch()
         self.ai_enabled_switch.set_active(self.config.get("ai_enabled", False))
+        self.ai_enabled_switch.connect("notify::active", self.auto_save)
         switch_box3.pack_start(lbl_ai_enabled, False, False, 0)
         switch_box3.pack_start(self.ai_enabled_switch, False, False, 0)
         general_box.pack_start(switch_box3, False, False, 0)
@@ -47,6 +52,7 @@ class ConfigWindow(Gtk.Window):
         lbl_hide_bubble = Gtk.Label(label=self.i18n.t("lbl_hide_bubble"))
         self.hide_bubble_switch = Gtk.Switch()
         self.hide_bubble_switch.set_active(self.config.get("hide_bubble", False))
+        self.hide_bubble_switch.connect("notify::active", self.auto_save)
         switch_box4.pack_start(lbl_hide_bubble, False, False, 0)
         switch_box4.pack_start(self.hide_bubble_switch, False, False, 0)
         general_box.pack_start(switch_box4, False, False, 0)
@@ -55,6 +61,7 @@ class ConfigWindow(Gtk.Window):
         lbl_auto_pause = Gtk.Label(label=self.i18n.t("lbl_auto_pause"))
         self.auto_pause_switch = Gtk.Switch()
         self.auto_pause_switch.set_active(self.config.get("auto_pause_media", True))
+        self.auto_pause_switch.connect("notify::active", self.auto_save)
         switch_box5.pack_start(lbl_auto_pause, False, False, 0)
         switch_box5.pack_start(self.auto_pause_switch, False, False, 0)
         general_box.pack_start(switch_box5, False, False, 0)
@@ -64,13 +71,10 @@ class ConfigWindow(Gtk.Window):
         self.autostart_switch = Gtk.Switch()
         autostart_path = os.path.expanduser("~/.config/autostart/dictate-daemon.desktop")
         self.autostart_switch.set_active(os.path.exists(autostart_path))
+        self.autostart_switch.connect("notify::active", self.auto_save)
         switch_box6.pack_start(lbl_autostart, False, False, 0)
         switch_box6.pack_start(self.autostart_switch, False, False, 0)
         general_box.pack_start(switch_box6, False, False, 0)
-
-        save_gen_btn = Gtk.Button(label=self.i18n.t("btn_save_general"))
-        save_gen_btn.connect("clicked", self.save_general)
-        general_box.pack_start(save_gen_btn, False, False, 10)
         
         # Tab 2: IA / LLM
         ia_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -81,11 +85,13 @@ class ConfigWindow(Gtk.Window):
         self.api_key_entry = Gtk.Entry()
         self.api_key_entry.set_text(self.config.get("api_key", ""))
         self.api_key_entry.set_visibility(False)
+        self.api_key_entry.connect("focus-out-event", self.auto_save)
         ia_box.pack_start(self.api_key_entry, False, False, 0)
         
         ia_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_model"), xalign=0), False, False, 0)
         self.model_entry = Gtk.Entry()
         self.model_entry.set_text(self.config.get("model", "gemma-4"))
+        self.model_entry.connect("focus-out-event", self.auto_save)
         ia_box.pack_start(self.model_entry, False, False, 0)
 
         ia_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_sys_prompt"), xalign=0), False, False, 0)
@@ -94,14 +100,11 @@ class ConfigWindow(Gtk.Window):
         
         default_base_prompt = "Eres un asistente de dictado en tiempo real.\nTu objetivo es limpiar el siguiente texto dictado por voz, corrigiendo errores obvios de reconocimiento de voz y puntuación, pero manteniéndolo lo más fiel posible al original.\nSi el texto incluye instrucciones verbales sobre formato (ej. 'abre paréntesis', 'nueva línea', 'coma', 'punto'), aplícalas.\nUtiliza las mayúsculas cuando corresponda y corrige las palabras homófonas según el contexto para darle sentido al texto sin cambiar las palabras originales ni agregar texto extra.\nDevuelve ÚNICAMENTE el texto corregido, sin saludos ni explicaciones."
         self.base_prompt_view.get_buffer().set_text(self.config.get("base_system_prompt", default_base_prompt))
+        self.base_prompt_view.connect("focus-out-event", self.auto_save)
         
         scroll_base_prompt = Gtk.ScrolledWindow()
         scroll_base_prompt.add(self.base_prompt_view)
         ia_box.pack_start(scroll_base_prompt, True, True, 0)
-        
-        save_ia_btn = Gtk.Button(label=self.i18n.t("btn_save_ai"))
-        save_ia_btn.connect("clicked", self.save_general)
-        ia_box.pack_start(save_ia_btn, False, False, 10)
         
         # Tab 3: Perfiles por Aplicación
         profiles_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -134,19 +137,18 @@ class ConfigWindow(Gtk.Window):
         right_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_sys_prompt"), xalign=0), False, False, 0)
         self.prompt_view = Gtk.TextView()
         self.prompt_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        self.prompt_view.connect("focus-out-event", self.auto_save_profile)
         scroll_prompt = Gtk.ScrolledWindow()
         scroll_prompt.add(self.prompt_view)
         right_box.pack_start(scroll_prompt, True, True, 0)
         
         self.vision_switch = Gtk.CheckButton(label=self.i18n.t("lbl_vision"))
+        self.vision_switch.connect("toggled", self.auto_save_profile)
         right_box.pack_start(self.vision_switch, False, False, 0)
         
         btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        save_prof_btn = Gtk.Button(label=self.i18n.t("btn_add_rule"))
-        save_prof_btn.connect("clicked", self.save_current_profile)
         del_prof_btn = Gtk.Button(label=self.i18n.t("btn_delete"))
         del_prof_btn.connect("clicked", self.delete_current_profile)
-        btn_box.pack_start(save_prof_btn, True, True, 0)
         btn_box.pack_start(del_prof_btn, False, False, 0)
         right_box.pack_start(btn_box, False, False, 0)
         
@@ -166,6 +168,7 @@ class ConfigWindow(Gtk.Window):
         self.ui_lang_combo.append("fr", "Français")
         self.ui_lang_combo.append("de", "Deutsch")
         self.ui_lang_combo.set_active_id(self.config.get("ui_language", "en"))
+        self.ui_lang_combo.connect("changed", self.on_ui_language_changed)
         ui_lang_box.pack_start(lbl_ui_lang, False, False, 0)
         ui_lang_box.pack_start(self.ui_lang_combo, False, False, 0)
         adv_box.pack_start(ui_lang_box, False, False, 0)
@@ -174,6 +177,7 @@ class ConfigWindow(Gtk.Window):
         lbl_vad = Gtk.Label(label=self.i18n.t("lbl_vad"))
         self.vad_switch = Gtk.Switch()
         self.vad_switch.set_active(self.config.get("vad_filter", False))
+        self.vad_switch.connect("notify::active", self.auto_save)
         vad_box.pack_start(lbl_vad, False, False, 0)
         vad_box.pack_start(self.vad_switch, False, False, 0)
         adv_box.pack_start(vad_box, False, False, 0)
@@ -192,6 +196,7 @@ class ConfigWindow(Gtk.Window):
         self.lang_combo.append("ja", "日本語 (Japanese)")
         self.lang_combo.append("ru", "Русский (Russian)")
         self.lang_combo.set_active_id(self.config.get("language", "auto"))
+        self.lang_combo.connect("changed", self.auto_save)
         lang_box.pack_start(lbl_lang, False, False, 0)
         lang_box.pack_start(self.lang_combo, False, False, 0)
         adv_box.pack_start(lang_box, False, False, 0)
@@ -201,6 +206,7 @@ class ConfigWindow(Gtk.Window):
         self.beam_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, 10, 1)
         self.beam_scale.set_value(self.config.get("beam_size", 5))
         self.beam_scale.set_digits(0)
+        self.beam_scale.connect("value-changed", self.auto_save)
         beam_box.pack_start(lbl_beam, False, False, 0)
         beam_box.pack_start(self.beam_scale, True, True, 0)
         adv_box.pack_start(beam_box, False, False, 0)
@@ -210,14 +216,11 @@ class ConfigWindow(Gtk.Window):
         self.temp_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 0.0, 1.0, 0.1)
         self.temp_scale.set_value(self.config.get("temperature", 0.0))
         self.temp_scale.set_digits(1)
+        self.temp_scale.connect("value-changed", self.auto_save)
         temp_box.pack_start(lbl_temp, False, False, 0)
         temp_box.pack_start(self.temp_scale, True, True, 0)
         adv_box.pack_start(temp_box, False, False, 0)
 
-        save_adv_btn = Gtk.Button(label=self.i18n.t("btn_save_adv"))
-        save_adv_btn.connect("clicked", self.save_general)
-        adv_box.pack_start(save_adv_btn, False, False, 10)
-        
         self.show_all()
         
     def load_config(self):
@@ -226,7 +229,37 @@ class ConfigWindow(Gtk.Window):
                 return json.load(f)
         return {}
 
-    def save_general(self, btn):
+    def update_ui_from_config(self, new_config):
+        self._updating_ui = True
+        self.config = new_config
+        
+        self.auto_send_switch.set_active(self.config.get("auto_send", False))
+        self.ai_enabled_switch.set_active(self.config.get("ai_enabled", False))
+        self.hide_bubble_switch.set_active(self.config.get("hide_bubble", False))
+        self.auto_pause_switch.set_active(self.config.get("auto_pause_media", True))
+        
+        self.api_key_entry.set_text(self.config.get("api_key", ""))
+        self.model_entry.set_text(self.config.get("model", "gemma-4"))
+        
+        if hasattr(self, 'vad_switch'):
+            self.vad_switch.set_active(self.config.get("vad_filter", False))
+            self.lang_combo.set_active_id(self.config.get("language", "auto"))
+            self.ui_lang_combo.set_active_id(self.config.get("ui_language", "en"))
+            self.beam_scale.set_value(self.config.get("beam_size", 5))
+            self.temp_scale.set_value(self.config.get("temperature", 0.0))
+        
+        self._updating_ui = False
+
+    def on_ui_language_changed(self, combo, *args):
+        if self._updating_ui: return
+        self.auto_save()
+        # To reflect UI language changes immediately, we restart the UI by telling the daemon
+        if self.daemon_ref:
+            GLib.idle_add(self.daemon_ref.restart_config_window)
+
+    def auto_save(self, *args):
+        if self._updating_ui: return
+        
         self.config["auto_send"] = self.auto_send_switch.get_active()
         self.config["ai_enabled"] = self.ai_enabled_switch.get_active()
         self.config["hide_bubble"] = self.hide_bubble_switch.get_active()
@@ -272,10 +305,9 @@ Icon=audio-input-microphone
         
         with open(self.config_path, "w") as f:
             json.dump(self.config, f, indent=4)
+            
         if self.on_config_saved:
             self.on_config_saved()
-            
-        self.show_message(self.i18n.t("msg_saved_title"), self.i18n.t("msg_saved_general"))
 
     def load_profiles(self):
         for child in self.listbox.get_children():
@@ -298,12 +330,15 @@ Icon=audio-input-microphone
 
     def on_app_selected(self, listbox, row):
         if not row:
+            self._updating_ui = True
             self.current_selected_app = None
             self.current_app_label.set_markup(f"<b>{self.i18n.t('msg_select_app')}</b>")
             self.prompt_view.get_buffer().set_text("")
             self.vision_switch.set_active(False)
+            self._updating_ui = False
             return
             
+        self._updating_ui = True
         self.current_selected_app = row.app_class
         self.current_app_label.set_markup(f"<b>Perfil: {self.current_selected_app}</b>")
         
@@ -319,6 +354,7 @@ Icon=audio-input-microphone
                 self.vision_switch.set_active(bool(data[1]))
         except Exception as e:
             print("Error loading profile details:", e)
+        self._updating_ui = False
 
     def get_open_apps(self):
         apps = set()
@@ -380,8 +416,8 @@ Icon=audio-input-microphone
             except Exception as e:
                 self.show_message("Error al añadir aplicación", str(e))
 
-    def save_current_profile(self, btn):
-        if not self.current_selected_app:
+    def auto_save_profile(self, *args):
+        if self._updating_ui or not self.current_selected_app:
             return
             
         buffer = self.prompt_view.get_buffer()
@@ -395,9 +431,8 @@ Icon=audio-input-microphone
             cursor.execute("UPDATE app_profiles SET system_prompt = ?, enable_vision = ? WHERE app_class = ?", (prompt, vision, self.current_selected_app))
             conn.commit()
             conn.close()
-            self.show_message(self.i18n.t("msg_saved_title"), self.i18n.t("msg_rule_added", self.current_selected_app))
         except Exception as e:
-            self.show_message(self.i18n.t("error", ""), str(e))
+            print("Auto-save profile error:", e)
 
     def delete_current_profile(self, btn):
         if not self.current_selected_app:
@@ -409,7 +444,6 @@ Icon=audio-input-microphone
             cursor.execute("DELETE FROM app_profiles WHERE app_class = ?", (self.current_selected_app,))
             conn.commit()
             conn.close()
-            self.show_message(self.i18n.t("msg_saved_title"), self.i18n.t("msg_rule_deleted", self.current_selected_app))
             self.load_profiles()
             self.on_app_selected(self.listbox, None)
         except Exception as e:

@@ -106,11 +106,10 @@ class DictationDaemon:
             return DEFAULT_CONFIG.copy()
 
     def save_config(self):
-        try:
-            with open(CONFIG_PATH, "w") as f:
-                json.dump(self.config, f, indent=4)
-        except Exception:
-            pass
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(self.config, f, indent=4)
+        if hasattr(self, 'config_window') and self.config_window:
+            GLib.idle_add(self.config_window.update_ui_from_config, self.config)
 
     def init_database(self):
         self.db_path = os.path.join(self.base_dir, "dictate.db")
@@ -427,26 +426,25 @@ class DictationDaemon:
 
 
             
-    def open_config_window(self, widget):
-        try:
-            import dictate_config_ui
-            import importlib
-            importlib.reload(dictate_config_ui) # In case we update the file
+    def open_config_window(self, widget=None):
+        if self.config_window:
+            self.config_window.present()
+            return
             
-            if hasattr(self, 'config_window') and self.config_window:
-                self.config_window.present()
-                return
-                
-            self.config_window = dictate_config_ui.ConfigWindow(
-                self.db_path,
-                CONFIG_PATH,
-                self.on_config_saved
-            )
+        try:
+            from dictate_config_ui import ConfigWindow
+            self.config_window = ConfigWindow(self.db_path, CONFIG_PATH, on_config_saved=self.on_config_saved, daemon_ref=self)
             self.config_window.connect("destroy", self.on_config_window_closed)
             self.config_window.show_all()
         except Exception as e:
             logging.error(f"Error opening config window: {e}", exc_info=True)
             self.show_error_notification(self.i18n.t("error"), self.i18n.t("error_opening_config"))
+
+    def restart_config_window(self):
+        if self.config_window:
+            self.config_window.destroy()
+            self.config_window = None
+            GLib.idle_add(self.open_config_window)
 
     def on_config_window_closed(self, widget):
         self.config_window = None
