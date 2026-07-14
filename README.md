@@ -84,7 +84,7 @@ OpenDictate includes a full plugin for **OpenDeck**, perfect for having physical
 
 ### OpenDeck Plugin Installation
 
-1. Make sure you have [OpenDeck](https://github.com/viktorgino/OpenDeck) installed and running.
+1. Make sure you have [OpenDeck](https://github.com/nekename/OpenDeck) installed and running.
 2. The `install.sh` script automatically copies the plugin to your OpenDeck configuration folder.
 3. **Restart the OpenDeck application**.
 4. In the OpenDeck configuration interface, look for the **"OpenDictate"** category.
