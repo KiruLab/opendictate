@@ -1,7 +1,7 @@
-# Dictate Whisper
+# OpenDictate
 
 Un potente y versátil asistente de dictado local para Linux (Wayland/X11) impulsado por `faster-whisper`.
-Dictate Whisper corre en segundo plano y te permite dictar texto en cualquier aplicación, reescribirlo usando Inteligencia Artificial (Gemma/Gemini), y controlar todo mediante atajos de teclado o desde un Elgato Stream Deck usando **OpenDeck**.
+OpenDictate corre en segundo plano y te permite dictar texto en cualquier aplicación, reescribirlo usando Inteligencia Artificial (Gemma/Gemini), y controlar todo mediante atajos de teclado o desde un Elgato Stream Deck usando **OpenDeck**.
 
 ## Características Principales
 
@@ -33,7 +33,7 @@ Dictate Whisper corre en segundo plano y te permite dictar texto en cualquier ap
 
 ## ⌨️ Uso con Atajos de Teclado (CLI)
 
-Si no tienes un Stream Deck, puedes controlar Dictate Whisper asignando comandos a los atajos de teclado de tu entorno de escritorio (GNOME, KDE, Hyprland, etc.).
+Si no tienes un Stream Deck, puedes controlar OpenDictate asignando comandos a los atajos de teclado de tu entorno de escritorio (GNOME, KDE, Hyprland, etc.).
 
 Comandos disponibles usando el binario `dictate`:
 
@@ -60,14 +60,14 @@ Comandos disponibles usando el binario `dictate`:
 
 ## 🎛️ Uso con OpenDeck (Stream Deck)
 
-Dictate Whisper incluye un plugin completo para **OpenDeck**, ideal para tener botones físicos con retroalimentación visual en tiempo real.
+OpenDictate incluye un plugin completo para **OpenDeck**, ideal para tener botones físicos con retroalimentación visual en tiempo real.
 
 ### Instalación del Plugin OpenDeck
 
 1. Asegúrate de tener [OpenDeck](https://github.com/viktorgino/OpenDeck) instalado y corriendo.
 2. El script `install.sh` ya habrá copiado el plugin a tu carpeta de plugins de OpenDeck (`~/.local/share/OpenDeck/plugins/`).
 3. **Reinicia la aplicación OpenDeck**.
-4. En la interfaz de configuración de OpenDeck, busca la categoría **"Dictate Whisper"**.
+4. En la interfaz de configuración de OpenDeck, busca la categoría **"OpenDictate"**.
 
 ### Acciones Disponibles en OpenDeck
 

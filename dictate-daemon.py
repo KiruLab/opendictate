@@ -532,7 +532,7 @@ class DictationDaemon:
         if hasattr(self, 'ai_check'):
             self.ai_check.set_active(new_state)
         self.export_state()
-        self.show_notification("Dictate Whisper", f"IA: {'Activada' if new_state else 'Desactivada'}")
+        self.show_notification("OpenDictate", f"IA: {'Activada' if new_state else 'Desactivada'}")
 
     def action_toggle_autosend(self):
         new_state = not self.config.get("auto_send", False)
@@ -541,7 +541,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(new_state)
         self.export_state()
-        self.show_notification("Dictate Whisper", f"Auto-Enviar: {'Activado' if new_state else 'Desactivado'}")
+        self.show_notification("OpenDictate", f"Auto-Enviar: {'Activado' if new_state else 'Desactivado'}")
 
     def action_autosend_activate(self):
         self.config["auto_send"] = True
@@ -549,7 +549,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(True)
         self.export_state()
-        self.show_notification("Dictate Whisper", "Auto-Enviar: Activado")
+        self.show_notification("OpenDictate", "Auto-Enviar: Activado")
         
     def action_autosend_deactivate(self):
         self.config["auto_send"] = False
@@ -557,7 +557,7 @@ class DictationDaemon:
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(False)
         self.export_state()
-        self.show_notification("Dictate Whisper", "Auto-Enviar: Desactivado")
+        self.show_notification("OpenDictate", "Auto-Enviar: Desactivado")
 
     def update_tray_status(self, text):
         logging.info(f"State Update: {text}")
@@ -649,13 +649,13 @@ class DictationDaemon:
                     self.config["auto_pause_media"] = val
                     self.save_config()
                     self.export_state()
-                    GLib.idle_add(self.show_notification, "Dictate Whisper", f"Auto-Pausa Medios: {'Activada' if val else 'Desactivada'}")
+                    GLib.idle_add(self.show_notification, "OpenDictate", f"Auto-Pausa Medios: {'Activada' if val else 'Desactivada'}")
                 elif data == "toggle-bubble":
                     val = not self.config.get("hide_bubble", False)
                     self.config["hide_bubble"] = val
                     self.save_config()
                     self.export_state()
-                    GLib.idle_add(self.show_notification, "Dictate Whisper", f"Burbuja: {'Oculta' if val else 'Visible'}")
+                    GLib.idle_add(self.show_notification, "OpenDictate", f"Burbuja: {'Oculta' if val else 'Visible'}")
                 elif data == "toggle-record-send":
                     GLib.idle_add(self.action_toggle_record_send)
                 elif data == "finish-normal":

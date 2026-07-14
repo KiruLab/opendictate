@@ -7,7 +7,7 @@ import os
 
 class ConfigWindow(Gtk.Window):
     def __init__(self, db_path, config_path, on_config_saved=None):
-        super().__init__(title="Configuración - Dictate Whisper")
+        super().__init__(title="Configuración - OpenDictate")
         self.set_default_size(650, 450)
         self.set_position(Gtk.WindowPosition.CENTER)
         
@@ -219,7 +219,7 @@ class ConfigWindow(Gtk.Window):
             install_dir = os.path.expanduser("~/.local/share/dictate-whisper")
             desktop_content = f"""[Desktop Entry]
 Type=Application
-Name=VoxPilot OS Daemon
+Name=OpenDictate
 Comment=Background daemon for global voice dictation using faster-whisper
 Exec={install_dir}/.venv/bin/python {install_dir}/dictate-daemon.py
 Hidden=false

@@ -5,7 +5,7 @@ INSTALL_DIR="$HOME/.local/share/dictate-whisper"
 AUTOSTART_DIR="$HOME/.config/autostart"
 VENV_DIR="$INSTALL_DIR/.venv"
 
-echo "🚀 Iniciando instalación de Dictate Whisper..."
+echo "🚀 Iniciando instalación de OpenDictate..."
 
 echo "📦 Instalando dependencias de sistema (requiere sudo)..."
 sudo apt update
@@ -44,7 +44,7 @@ mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/dictate-whisper.desktop" << EOF
 [Desktop Entry]
 Type=Application
-Name=VoxPilot OS Daemon
+Name=OpenDictate
 Comment=Background daemon for global voice dictation using faster-whisper
 Exec=$INSTALL_DIR/.venv/bin/python $INSTALL_DIR/dictate-daemon.py
 Hidden=false

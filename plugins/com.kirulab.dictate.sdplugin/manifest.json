@@ -2,7 +2,7 @@
   "Actions": [
     {
       "Icon": "icons/monitor",
-      "Name": "Dictate Whisper Monitor",
+      "Name": "OpenDictate Monitor",
       "UUID": "com.kirulab.dictate.monitor",
       "States": [
         {
@@ -12,7 +12,7 @@
     },
     {
       "Icon": "icons/record",
-      "Name": "Dictate Whisper Record",
+      "Name": "OpenDictate Record",
       "UUID": "com.kirulab.dictate.record",
       "States": [
         {
@@ -31,7 +31,7 @@
     },
     {
       "Icon": "icons/send_enabled",
-      "Name": "Dictate Whisper Send",
+      "Name": "OpenDictate Send",
       "UUID": "com.kirulab.dictate.send",
       "States": [
         {"Name": "Disabled", "Image": "icons/send_disabled"},
@@ -40,7 +40,7 @@
     },
     {
       "Icon": "icons/cancel_enabled",
-      "Name": "Dictate Whisper Cancel",
+      "Name": "OpenDictate Cancel",
       "UUID": "com.kirulab.dictate.cancel",
       "States": [
         {"Name": "Disabled", "Image": "icons/cancel_disabled"},
@@ -95,11 +95,11 @@
     }
   ],
   "Author": "Kirulab",
-  "Category": "Dictate Whisper",
+  "Category": "OpenDictate",
   "CategoryIcon": "icons/category",
   "CodePath": "start.sh",
-  "Description": "Control and monitor Dictate Whisper.",
-  "Name": "Dictate Whisper",
+  "Description": "Control and monitor OpenDictate.",
+  "Name": "OpenDictate",
   "Icon": "icons/plugin",
   "OS": [{"Platform": "linux", "MinimumVersion": "1.0"}],
   "Software": {"MinimumVersion": "5.0"},

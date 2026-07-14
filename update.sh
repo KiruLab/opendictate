@@ -25,7 +25,7 @@ cp -r img "$INSTALL_DIR/"
 cat > "$HOME/.local/share/applications/dictate-whisper.desktop" << EOF
 [Desktop Entry]
 Type=Application
-Name=VoxPilot OS Daemon
+Name=OpenDictate
 Comment=Background daemon for global voice dictation
 Exec=$INSTALL_DIR/.venv/bin/python $INSTALL_DIR/dictate-daemon.py
 Icon=$INSTALL_DIR/img/logo.png
