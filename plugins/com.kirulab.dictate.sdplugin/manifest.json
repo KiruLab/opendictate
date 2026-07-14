@@ -98,10 +98,11 @@
   "Category": "OpenDictate",
   "CategoryIcon": "icons/category",
   "CodePath": "start.sh",
-  "Description": "Control and monitor OpenDictate.",
+  "Description": "Control and monitor OpenDictate. Note: Requires the OpenDictate daemon to be installed. Download it from: https://github.com/KiruLab/opendictate",
   "Name": "OpenDictate",
   "Icon": "icons/plugin",
+  "URL": "https://github.com/KiruLab/opendictate",
   "OS": [{"Platform": "linux", "MinimumVersion": "1.0"}],
   "Software": {"MinimumVersion": "5.0"},
-  "Version": "1.0"
+  "Version": "1.0.0"
 }
