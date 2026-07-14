@@ -17,15 +17,15 @@
       "States": [
         {
           "Name": "Idle",
-          "Image": "icons/record_idle"
+          "Image": "icons/record"
         },
         {
           "Name": "Recording",
-          "Image": "icons/record_active"
+          "Image": "icons/record_pause"
         },
         {
           "Name": "Paused",
-          "Image": "icons/record_paused"
+          "Image": "icons/record_resume"
         }
       ]
     },
@@ -34,17 +34,17 @@
       "Name": "Dictate Whisper Send",
       "UUID": "com.butcherwutcher.dictate.send",
       "States": [
-        {"Image": "icons/plugin"},
-        {"Image": "icons/plugin"}
+        {"Name": "Disabled", "Image": "icons/send_disabled"},
+        {"Name": "Enabled", "Image": "icons/send_enabled"}
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/cancel_enabled",
       "Name": "Dictate Whisper Cancel",
       "UUID": "com.butcherwutcher.dictate.cancel",
       "States": [
-        {"Image": "icons/plugin"},
-        {"Image": "icons/plugin"}
+        {"Name": "Disabled", "Image": "icons/cancel_disabled"},
+        {"Name": "Enabled", "Image": "icons/cancel_enabled"}
       ]
     },
     {
@@ -52,17 +52,17 @@
       "Name": "Toggle AI Cleaning",
       "UUID": "com.butcherwutcher.dictate.toggle_ai",
       "States": [
-        {"Name": "Off", "Image": "icons/plugin"},
-        {"Name": "On", "Image": "icons/plugin"}
+        {"Name": "Off", "Image": "icons/ai_off"},
+        {"Name": "On", "Image": "icons/ai_on"}
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/send_enabled",
       "Name": "Send to AI",
       "UUID": "com.butcherwutcher.dictate.send_ai",
       "States": [
-        {"Name": "Disabled", "Image": "icons/plugin"},
-        {"Name": "Enabled", "Image": "icons/plugin"}
+        {"Name": "Disabled", "Image": "icons/send_disabled"},
+        {"Name": "Enabled", "Image": "icons/send_enabled"}
       ]
     },
     {
@@ -75,30 +75,30 @@
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/autosend_on",
       "Name": "Toggle Auto-Send",
       "UUID": "com.butcherwutcher.dictate.toggle_autosend",
       "States": [
-        {"Name": "Off", "Image": "icons/plugin"},
-        {"Name": "On", "Image": "icons/plugin"}
+        {"Name": "Off", "Image": "icons/autosend_off"},
+        {"Name": "On", "Image": "icons/autosend_on"}
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/media_pause_on",
       "Name": "Toggle Auto-Pause",
       "UUID": "com.butcherwutcher.dictate.toggle_autopause",
       "States": [
-        {"Name": "Off", "Image": "icons/plugin"},
-        {"Name": "On", "Image": "icons/plugin"}
+        {"Name": "Off", "Image": "icons/media_pause_off"},
+        {"Name": "On", "Image": "icons/media_pause_on"}
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/bubble_on",
       "Name": "Toggle Bubble Visibility",
       "UUID": "com.butcherwutcher.dictate.toggle_bubble",
       "States": [
-        {"Name": "Off", "Image": "icons/plugin"},
-        {"Name": "On", "Image": "icons/plugin"}
+        {"Name": "Off", "Image": "icons/bubble_off"},
+        {"Name": "On", "Image": "icons/bubble_on"}
       ]
     }
   ],
