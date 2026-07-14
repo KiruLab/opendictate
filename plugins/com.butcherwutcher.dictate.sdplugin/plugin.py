@@ -46,6 +46,8 @@ active_contexts = {
     "bubble": set()
 }
 
+force_update = False
+
 STATE_FILE = "/tmp/dictate_state.json"
 
 def get_daemon_state():
@@ -116,6 +118,7 @@ async def watch_state(ws):
             
         # Title formatting
         title = ""
+        global force_update
         if current_state == "RECORDING":
             title = current_time
         elif current_state == "PAUSED":
@@ -132,8 +135,9 @@ async def watch_state(ws):
             title = "Offline"
             
         changed = False
-        if current_state != last_state or current_time != last_time:
+        if current_state != last_state or current_time != last_time or force_update:
             changed = True
+            force_update = False
             last_state = current_state
             last_time = current_time
             
@@ -249,6 +253,8 @@ async def connect_streamdeck():
             action = data.get("action")
             
             if event == "willAppear":
+                global force_update
+                force_update = True
                 act_suffix = action.split(".")[-1]
                 if act_suffix == "monitor":
                     active_contexts["monitor"].add(context)

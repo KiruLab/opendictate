@@ -11,7 +11,7 @@
       ]
     },
     {
-      "Icon": "icons/record_idle",
+      "Icon": "icons/record",
       "Name": "Dictate Whisper Record",
       "UUID": "com.butcherwutcher.dictate.record",
       "States": [
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/send_enabled",
       "Name": "Dictate Whisper Send",
       "UUID": "com.butcherwutcher.dictate.send",
       "States": [
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "Icon": "icons/plugin",
+      "Icon": "icons/ai_on",
       "Name": "Toggle AI Cleaning",
       "UUID": "com.butcherwutcher.dictate.toggle_ai",
       "States": [
