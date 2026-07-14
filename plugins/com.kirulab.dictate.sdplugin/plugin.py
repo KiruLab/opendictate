@@ -37,7 +37,6 @@ active_contexts = {
     "monitor": set(),
     "record": set(),
     "send": set(),
-    "send_ai": set(),
     "preview": set(),
     "cancel": set(),
     "ai": set(),
@@ -187,12 +186,6 @@ async def watch_state(ws):
                     "context": ctx,
                     "payload": {"state": send_usable}
                 }))
-            for ctx in active_contexts["send_ai"].copy():
-                await ws.send(json.dumps({
-                    "event": "setState",
-                    "context": ctx,
-                    "payload": {"state": send_usable}
-                }))
             for ctx in active_contexts["preview"].copy():
                 await ws.send(json.dumps({
                     "event": "setState",
@@ -262,8 +255,7 @@ async def connect_streamdeck():
                     active_contexts["record"].add(context)
                 elif act_suffix == "send":
                     active_contexts["send"].add(context)
-                elif act_suffix == "send_ai":
-                    active_contexts["send_ai"].add(context)
+
                 elif act_suffix == "preview":
                     active_contexts["preview"].add(context)
                 elif act_suffix == "cancel":
@@ -364,13 +356,6 @@ async def connect_streamdeck():
                         "context": context,
                         "payload": {"state": send_usable}
                     })))
-                elif act_suffix == "send_ai":
-                    send_usable = 1 if current_state in ["RECORDING", "PAUSED"] else 0
-                    asyncio.create_task(ws.send(json.dumps({
-                        "event": "setState",
-                        "context": context,
-                        "payload": {"state": send_usable}
-                    })))
                 elif act_suffix == "preview":
                     send_usable = 1 if current_state in ["RECORDING", "PAUSED"] else 0
                     asyncio.create_task(ws.send(json.dumps({
@@ -394,8 +379,6 @@ async def connect_streamdeck():
                     active_contexts["record"].remove(context)
                 elif act_suffix == "send" and context in active_contexts["send"]:
                     active_contexts["send"].remove(context)
-                elif act_suffix == "send_ai" and context in active_contexts["send_ai"]:
-                    active_contexts["send_ai"].remove(context)
                 elif act_suffix == "preview" and context in active_contexts["preview"]:
                     active_contexts["preview"].remove(context)
                 elif act_suffix == "cancel" and context in active_contexts["cancel"]:
@@ -423,8 +406,6 @@ async def connect_streamdeck():
                     subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--cycle-model"])
                 elif act_suffix == "send":
                     subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--send"])
-                elif act_suffix == "send_ai":
-                    subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--finish-ai"])
                 elif act_suffix == "preview":
                     subprocess.Popen(["/home/butcherwutcher/.local/bin/dictate", "--preview"])
                 elif act_suffix == "cancel":

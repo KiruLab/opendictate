@@ -55,15 +55,7 @@
         {"Name": "Off", "Image": "icons/ai_off"},
         {"Name": "On", "Image": "icons/ai_on"}
       ]
-    },
-    {
-      "Icon": "icons/send_enabled",
-      "Name": "Send to AI",
-      "UUID": "com.kirulab.dictate.send_ai",
-      "States": [
-        {"Name": "Disabled", "Image": "icons/send_disabled"},
-        {"Name": "Enabled", "Image": "icons/send_enabled"}
-      ]
+
     },
     {
       "Icon": "icons/preview",
