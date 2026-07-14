@@ -18,6 +18,7 @@ import json
 import logging
 import numpy as np
 import sqlite3
+import keyring
 import datetime
 import dbus
 import logging
@@ -61,8 +62,9 @@ DEFAULT_CONFIG = {
 class DictationDaemon:
     def __init__(self):
         self.base_dir = os.path.expanduser("~/.local/share/dictate-whisper")
+        self.init_database()
         self.config = self.load_config()
-        self.i18n = get_translator(CONFIG_PATH)
+        self.i18n = get_translator(self.config.get("ui_language", "en"))
         self.model_size = self.config.get("whisper_model_size", "medium")
         self.model = None
         self.config_window = None
@@ -90,25 +92,74 @@ class DictationDaemon:
         self.load_model_async(self.model_size)
 
     def load_config(self):
-        if not os.path.exists(os.path.dirname(CONFIG_PATH)):
-            os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)
-        if not os.path.exists(CONFIG_PATH):
-            with open(CONFIG_PATH, "w") as f:
-                json.dump(DEFAULT_CONFIG, f, indent=4)
-            return DEFAULT_CONFIG.copy()
+        cfg = DEFAULT_CONFIG.copy()
+        
+        # Migración desde config.json si existe
+        if os.path.exists(CONFIG_PATH):
+            try:
+                with open(CONFIG_PATH, "r") as f:
+                    old_cfg = json.load(f)
+                
+                # Migrar API Key a keyring
+                if "api_key" in old_cfg and old_cfg["api_key"]:
+                    keyring.set_password("OpenDictate", "api_key", old_cfg["api_key"])
+                    del old_cfg["api_key"]
+                
+                # Migrar resto a DB
+                conn = sqlite3.connect(self.db_path)
+                cursor = conn.cursor()
+                for k, v in old_cfg.items():
+                    cursor.execute("INSERT OR REPLACE INTO global_settings (key, value) VALUES (?, ?)", (k, json.dumps(v)))
+                conn.commit()
+                conn.close()
+                
+                # Eliminar config.json antiguo
+                os.remove(CONFIG_PATH)
+            except Exception as e:
+                logging.error(f"Error migrando config.json: {e}")
+
+        # Cargar de DB
         try:
-            with open(CONFIG_PATH, "r") as f:
-                cfg = json.load(f)
-                for k, v in DEFAULT_CONFIG.items():
-                    if k not in cfg:
-                        cfg[k] = v
-                return cfg
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("SELECT key, value FROM global_settings")
+            for row in cursor.fetchall():
+                cfg[row[0]] = json.loads(row[1])
+            conn.close()
+        except Exception as e:
+            logging.error(f"Error cargando configuracion desde DB: {e}")
+
+        # Cargar API Key desde keyring
+        try:
+            stored_key = keyring.get_password("OpenDictate", "api_key")
+            cfg["api_key"] = stored_key if stored_key else ""
         except Exception:
-            return DEFAULT_CONFIG.copy()
+            cfg["api_key"] = ""
+            
+        return cfg
 
     def save_config(self):
-        with open(CONFIG_PATH, "w") as f:
-            json.dump(self.config, f, indent=4)
+        # Guardar API key en keyring y eliminar de self.config temporalmente para no guardarlo en la DB
+        api_key = self.config.get("api_key", "")
+        if api_key:
+            keyring.set_password("OpenDictate", "api_key", api_key)
+        else:
+            try:
+                keyring.delete_password("OpenDictate", "api_key")
+            except:
+                pass
+                
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            for k, v in self.config.items():
+                if k != "api_key":
+                    cursor.execute("INSERT OR REPLACE INTO global_settings (key, value) VALUES (?, ?)", (k, json.dumps(v)))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logging.error(f"Error guardando configuracion en DB: {e}")
+
         if hasattr(self, 'config_window') and self.config_window:
             GLib.idle_add(self.config_window.update_ui_from_config, self.config)
 
@@ -137,6 +188,14 @@ class DictationDaemon:
                     llm_text TEXT
                 )
             ''')
+            
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS global_settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT
+                )
+            ''')
+            
             conn.commit()
             conn.close()
             logging.info("Base de datos SQLite inicializada.")
@@ -460,9 +519,13 @@ class DictationDaemon:
     def on_config_window_closed(self, widget):
         self.config_window = None
 
-    def on_config_saved(self):
-        self.config = self.load_config()
-        self.i18n = get_translator(CONFIG_PATH)
+    def on_config_saved(self, new_config=None):
+        if new_config is not None:
+            self.config = new_config
+            self.save_config()
+        else:
+            self.config = self.load_config()
+        self.i18n = get_translator(self.config.get("ui_language", "en"))
         self.build_menu()
         if hasattr(self, 'auto_send_check'):
             self.auto_send_check.set_active(self.config.get("auto_send", False))

@@ -14,7 +14,7 @@ class ConfigWindow(Gtk.Window):
         self.daemon_ref = daemon_ref
         
         self.config = self.load_config()
-        self.i18n = get_translator(self.config_path)
+        self.i18n = get_translator(self.config.get("ui_language", "en"))
         
         self._updating_ui = False
 
@@ -271,9 +271,8 @@ class ConfigWindow(Gtk.Window):
         return True
 
     def load_config(self):
-        if os.path.exists(self.config_path):
-            with open(self.config_path, "r") as f:
-                return json.load(f)
+        if self.daemon_ref:
+            return self.daemon_ref.config.copy()
         return {}
 
     def update_ui_from_config(self, new_config):
@@ -363,11 +362,8 @@ Icon=audio-input-microphone
         start, end = buf.get_bounds()
         self.config["base_system_prompt"] = buf.get_text(start, end, True).strip()
         
-        with open(self.config_path, "w") as f:
-            json.dump(self.config, f, indent=4)
-            
         if self.on_config_saved:
-            self.on_config_saved()
+            self.on_config_saved(self.config)
 
     def load_profiles(self):
         for child in self.listbox.get_children():

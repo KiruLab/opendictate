@@ -17,17 +17,17 @@ This was chosen as the baseline because it is **completely free** and provides a
 **Limitations of the Free Tier:**
 While excellent for daily tasks, the free API might sometimes be slow, experience rate limits, or encounter timeouts during peak hours.
 
-If you encounter these issues or simply want better quality and speed, you can easily switch to a more powerful model (like `gemini-1.5-pro`) by following these steps:
+If you encounter these issues or simply want better quality and speed, you can easily switch to a more powerful model (like `gemini-3.5-flash`) by following these steps:
 
 **How to get your API Key and change the model:**
 1. Go to [Google AI Studio (API Keys)](https://aistudio.google.com/app/apikey).
 2. Sign in with your Google account.
 3. Click on **Create API key** and copy it to your clipboard.
 4. Open the OpenDictate settings, navigate to the **AI & Models** tab, and paste your API key.
-5. In the **Model** field, you can leave the default, or upgrade it to `gemini-1.5-pro` (or any other supported model) if you want the best performance and reliability.
+5. In the **Model** field, you can leave the default, or upgrade it to `gemini-3.5-flash` (or any other supported model) if you want the best performance and reliability. (https://ai.google.dev/gemini-api/docs/models)
 
 **Thinking Mode (Chain of Thought):**
-You can also enable the **AI Thinking Mode** from the settings. This allows the model to "think" out loud before returning the cleaned text, improving complex reasoning tasks. Please refer to the [Gemma on Gemini API docs](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) for model compatibility, as some models (like certain `gemini-2.0` versions) natively support advanced thinking capabilities.
+You can also enable the **AI Thinking Mode** from the settings. This allows the model to "think" out loud before returning the cleaned text, improving complex reasoning tasks. Please refer to the [Gemma on Gemini API docs](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) for model compatibility, as some models natively support advanced thinking capabilities.
 
 ## 🚀 Key Features
 

@@ -342,17 +342,10 @@ TRANSLATIONS = {
 }
 
 class Translator:
-    def __init__(self, config_path):
-        self.lang = DEFAULT_LANG
-        if os.path.exists(config_path):
-            try:
-                with open(config_path, "r") as f:
-                    config = json.load(f)
-                    self.lang = config.get("ui_language", DEFAULT_LANG)
-            except:
-                pass
-        
-        if self.lang not in TRANSLATIONS:
+    def __init__(self, lang_code):
+        self.lang = lang_code
+        if not self.lang or self.lang not in TRANSLATIONS:
+            self.lang = DEFAULT_LANG
             self.lang = DEFAULT_LANG
 
     def t(self, key, *args):
@@ -364,5 +357,5 @@ class Translator:
             return text.format(*args)
         return text
 
-def get_translator(config_path):
-    return Translator(config_path)
+def get_translator(lang_code):
+    return Translator(lang_code)
