@@ -43,7 +43,7 @@ Comandos disponibles usando el binario `dictate`:
 | `dictate --record` | Inicia la grabación (o la reanuda si estaba pausada). |
 | `dictate --pause` | Pausa la grabación actual sin enviarla. |
 | `dictate --cancel` | Cancela la grabación actual y descarta el audio. |
-| `dictate --preview` | Detiene la grabación y pega el texto crudo en la pantalla. |
+| `dictate --preview` | Detiene la grabación y mantiene el texto en la burbuja para revisión. |
 | `dictate --finish-normal` | Termina la grabación y la inserta como texto normal. |
 | `dictate --finish-ai` | Termina la grabación, la procesa por la IA (Gemma/Gemini) y luego la inserta. |
 | `dictate --send` | Simula la tecla "Enter" luego de pegar el texto. |

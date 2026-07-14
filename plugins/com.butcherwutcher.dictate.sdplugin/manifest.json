@@ -67,7 +67,7 @@
     },
     {
       "Icon": "icons/plugin",
-      "Name": "Preview (Paste Raw)",
+      "Name": "Preview (Review)",
       "UUID": "com.butcherwutcher.dictate.preview",
       "States": [
         {"Name": "Disabled", "Image": "icons/plugin"},
