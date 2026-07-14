@@ -2,7 +2,7 @@
   "Actions": [
     {
       "Icon": "icons/monitor",
-      "Name": "OpenDictate Monitor",
+      "Name": "Monitor",
       "UUID": "com.kirulab.dictate.monitor",
       "States": [
         {
@@ -12,7 +12,7 @@
     },
     {
       "Icon": "icons/record",
-      "Name": "OpenDictate Record",
+      "Name": "Record",
       "UUID": "com.kirulab.dictate.record",
       "States": [
         {
@@ -31,7 +31,7 @@
     },
     {
       "Icon": "icons/send_enabled",
-      "Name": "OpenDictate Send",
+      "Name": "Send",
       "UUID": "com.kirulab.dictate.send",
       "States": [
         {"Name": "Disabled", "Image": "icons/send_disabled"},
@@ -40,7 +40,7 @@
     },
     {
       "Icon": "icons/cancel_enabled",
-      "Name": "OpenDictate Cancel",
+      "Name": "Cancel",
       "UUID": "com.kirulab.dictate.cancel",
       "States": [
         {"Name": "Disabled", "Image": "icons/cancel_disabled"},
