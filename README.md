@@ -9,6 +9,23 @@ Thanks to the robust architecture of OpenAI's Whisper models, OpenDictate native
 - Force transcription into a specific language for improved accuracy.
 - Translate your voice from any supported language into English on the fly.
 
+## 🤖 AI Models (Gemini / Gemma)
+
+By default, OpenDictate uses the free tier of the Gemini API (specifically configuring Gemma/Gemini models) to power the "AI Cleaning" feature. 
+This was chosen as the baseline because it is **completely free** and provides a very generous amount of usage.
+
+**Limitations of the Free Tier:**
+While excellent for daily tasks, the free API might sometimes be slow, experience rate limits, or encounter timeouts during peak hours.
+
+If you encounter these issues or simply want better quality and speed, you can easily switch to a more powerful model (like `gemini-1.5-pro`) by following these steps:
+
+**How to get your API Key and change the model:**
+1. Go to [Google AI Studio (API Keys)](https://aistudio.google.com/app/apikey).
+2. Sign in with your Google account.
+3. Click on **Create API key** and copy it to your clipboard.
+4. Open the OpenDictate settings, navigate to the **AI & Models** tab, and paste your API key.
+5. In the **Model** field, you can leave the default, or upgrade it to `gemini-1.5-pro` (or any other supported model) if you want the best performance and reliability.
+
 ## 🚀 Key Features
 
 * **100% Local and Private**: Uses Whisper models running entirely on your local machine.
