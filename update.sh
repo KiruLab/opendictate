@@ -19,6 +19,20 @@ chmod +x "$INSTALL_DIR/dictate-client.py"
 cp "$INSTALL_DIR/dictate-client.py" "$HOME/.local/bin/dictate"
 chmod +x "$HOME/.local/bin/dictate"
 
+echo "📝 Creando acceso directo de aplicación..."
+mkdir -p "$HOME/.local/share/applications"
+cp -r img "$INSTALL_DIR/"
+cat > "$HOME/.local/share/applications/dictate-whisper.desktop" << EOF
+[Desktop Entry]
+Type=Application
+Name=VoxPilot OS Daemon
+Comment=Background daemon for global voice dictation
+Exec=$INSTALL_DIR/.venv/bin/python $INSTALL_DIR/dictate-daemon.py
+Icon=$INSTALL_DIR/img/logo.png
+Terminal=false
+Categories=Utility;
+EOF
+
 echo "🔄 Reiniciando demonio..."
 pkill -9 -f dictate-daemon.py
 sleep 1

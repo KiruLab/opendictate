@@ -56,6 +56,16 @@ class ConfigWindow(Gtk.Window):
         switch_box5.pack_start(lbl_auto_pause, False, False, 0)
         switch_box5.pack_start(self.auto_pause_switch, False, False, 0)
         general_box.pack_start(switch_box5, False, False, 0)
+
+        switch_box6 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_autostart = Gtk.Label(label="Inicio automático con el sistema:")
+        self.autostart_switch = Gtk.Switch()
+        autostart_path = os.path.expanduser("~/.config/autostart/dictate-daemon.desktop")
+        self.autostart_switch.set_active(os.path.exists(autostart_path))
+        switch_box6.pack_start(lbl_autostart, False, False, 0)
+        switch_box6.pack_start(self.autostart_switch, False, False, 0)
+        general_box.pack_start(switch_box6, False, False, 0)
+
         save_gen_btn = Gtk.Button(label="Guardar Configuración General")
         save_gen_btn.connect("clicked", self.save_general)
         general_box.pack_start(save_gen_btn, False, False, 10)
@@ -200,6 +210,28 @@ class ConfigWindow(Gtk.Window):
         self.config["ai_enabled"] = self.ai_enabled_switch.get_active()
         self.config["hide_bubble"] = self.hide_bubble_switch.get_active()
         self.config["auto_pause_media"] = self.auto_pause_switch.get_active()
+
+        # Handle autostart desktop file
+        autostart_dir = os.path.expanduser("~/.config/autostart")
+        autostart_path = os.path.join(autostart_dir, "dictate-daemon.desktop")
+        if self.autostart_switch.get_active():
+            os.makedirs(autostart_dir, exist_ok=True)
+            install_dir = os.path.expanduser("~/.local/share/dictate-whisper")
+            desktop_content = f"""[Desktop Entry]
+Type=Application
+Name=VoxPilot OS Daemon
+Comment=Background daemon for global voice dictation using faster-whisper
+Exec={install_dir}/.venv/bin/python {install_dir}/dictate-daemon.py
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Icon=audio-input-microphone
+"""
+            with open(autostart_path, "w") as f:
+                f.write(desktop_content)
+        else:
+            if os.path.exists(autostart_path):
+                os.remove(autostart_path)
         
         # Guardar Model Settings
         self.config["api_key"] = self.api_key_entry.get_text().strip()

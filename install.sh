@@ -20,6 +20,7 @@ cp dictate-daemon.py "$INSTALL_DIR/"
 cp dictate-client.py "$INSTALL_DIR/"
 cp dictate_config_ui.py "$INSTALL_DIR/"
 cp -r plugins "$INSTALL_DIR/"
+cp -r img "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/dictate-daemon.py"
 chmod +x "$INSTALL_DIR/dictate-client.py"
 
@@ -38,17 +39,19 @@ echo "🔧 Actualizando shebangs para usar el entorno virtual..."
 sed -i "1s|.*|#!$VENV_DIR/bin/python|" "$INSTALL_DIR/dictate-daemon.py"
 sed -i "1s|.*|#!$VENV_DIR/bin/python|" "$INSTALL_DIR/dictate-client.py"
 
-echo "⚙️ Configurando autoinicio..."
-cat > "$AUTOSTART_DIR/dictate-daemon.desktop" << EOF
+echo "⚙️ Configurando acceso directo de aplicación..."
+mkdir -p "$HOME/.local/share/applications"
+cat > "$HOME/.local/share/applications/dictate-whisper.desktop" << EOF
 [Desktop Entry]
 Type=Application
 Name=VoxPilot OS Daemon
 Comment=Background daemon for global voice dictation using faster-whisper
-Exec=$INSTALL_DIR/dictate-daemon.py
+Exec=$INSTALL_DIR/.venv/bin/python $INSTALL_DIR/dictate-daemon.py
 Hidden=false
 NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Icon=audio-input-microphone
+Icon=$INSTALL_DIR/img/logo.png
+Terminal=false
+Categories=Utility;
 EOF
 
 echo "✅ Instalación completada."
