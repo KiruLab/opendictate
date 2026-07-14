@@ -7,6 +7,7 @@ echo "🔄 Actualizando archivos del sistema..."
 cp dictate-daemon.py "$INSTALL_DIR/"
 cp dictate-client.py "$INSTALL_DIR/"
 cp dictate_config_ui.py "$INSTALL_DIR/"
+cp i18n.py "$INSTALL_DIR/"
 cp -r plugins "$INSTALL_DIR/"
 
 echo "📦 Instalando plugin en OpenDeck..."
