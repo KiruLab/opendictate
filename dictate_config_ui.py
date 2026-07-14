@@ -21,6 +21,7 @@ class ConfigWindow(Gtk.Window):
         super().__init__(title=self.i18n.t("settings_title"))
         self.set_default_size(650, 450)
         self.set_position(Gtk.WindowPosition.CENTER)
+        self.connect("delete-event", self.on_delete_event)
         
         notebook = Gtk.Notebook()
         self.add(notebook)
@@ -124,6 +125,15 @@ class ConfigWindow(Gtk.Window):
         ia_settings_box.pack_start(temp_box, True, True, 0)
         
         ia_box.pack_start(ia_settings_box, False, False, 0)
+        
+        thinking_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        lbl_thinking = Gtk.Label(label=self.i18n.t("lbl_llm_thinking"))
+        self.llm_thinking_switch = Gtk.Switch()
+        self.llm_thinking_switch.set_active(self.config.get("llm_thinking", False))
+        self.llm_thinking_switch.connect("notify::active", self.auto_save)
+        thinking_box.pack_start(lbl_thinking, False, False, 0)
+        thinking_box.pack_start(self.llm_thinking_switch, False, False, 0)
+        ia_box.pack_start(thinking_box, False, False, 0)
 
         ia_box.pack_start(Gtk.Label(label=self.i18n.t("lbl_sys_prompt"), xalign=0), False, False, 0)
         self.base_prompt_view = Gtk.TextView()
@@ -134,6 +144,7 @@ class ConfigWindow(Gtk.Window):
         self.base_prompt_view.connect("focus-out-event", self.auto_save)
         
         scroll_base_prompt = Gtk.ScrolledWindow()
+        scroll_base_prompt.set_shadow_type(Gtk.ShadowType.IN)
         scroll_base_prompt.add(self.base_prompt_view)
         ia_box.pack_start(scroll_base_prompt, True, True, 0)
         
@@ -170,6 +181,7 @@ class ConfigWindow(Gtk.Window):
         self.prompt_view.set_wrap_mode(Gtk.WrapMode.WORD)
         self.prompt_view.connect("focus-out-event", self.auto_save_profile)
         scroll_prompt = Gtk.ScrolledWindow()
+        scroll_prompt.set_shadow_type(Gtk.ShadowType.IN)
         scroll_prompt.add(self.prompt_view)
         right_box.pack_start(scroll_prompt, True, True, 0)
         
@@ -254,6 +266,10 @@ class ConfigWindow(Gtk.Window):
 
         self.show_all()
         
+    def on_delete_event(self, widget, event):
+        self.hide()
+        return True
+
     def load_config(self):
         if os.path.exists(self.config_path):
             with open(self.config_path, "r") as f:
@@ -277,6 +293,7 @@ class ConfigWindow(Gtk.Window):
         if hasattr(self, 'llm_timeout_spin'):
             self.llm_timeout_spin.set_value(self.config.get("llm_timeout", 120))
             self.llm_temp_scale.set_value(self.config.get("llm_temperature", 0.7))
+            self.llm_thinking_switch.set_active(self.config.get("llm_thinking", False))
         
         if hasattr(self, 'vad_switch'):
             self.vad_switch.set_active(self.config.get("vad_filter", False))
@@ -332,6 +349,7 @@ Icon=audio-input-microphone
         if hasattr(self, 'llm_timeout_spin'):
             self.config["llm_timeout"] = int(self.llm_timeout_spin.get_value())
             self.config["llm_temperature"] = float(self.llm_temp_scale.get_value())
+            self.config["llm_thinking"] = self.llm_thinking_switch.get_active()
         
         # Guardar Configuración Avanzada si existen los widgets
         if hasattr(self, 'vad_switch'):

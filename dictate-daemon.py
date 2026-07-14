@@ -438,6 +438,7 @@ class DictationDaemon:
             
     def open_config_window(self, widget=None):
         if getattr(self, 'config_window', None):
+            self.config_window.update_ui_from_config(self.config)
             self.config_window.present()
             return
             
@@ -676,6 +677,8 @@ class DictationDaemon:
                     GLib.idle_add(self.action_finish_ai)
                 elif data == "quit":
                     GLib.idle_add(Gtk.main_quit)
+                elif data == "settings":
+                    GLib.idle_add(self.open_config_window)
             except Exception:
                 pass
 
@@ -988,7 +991,7 @@ class DictationDaemon:
                     for segment in segments:
                         for word in segment.words:
                             abs_time = chunk_start_time + word.start
-                            if abs_time >= self.last_transcribed_time and abs_time < (chunk_end_time - overlap):
+                            if abs_time >= (self.last_transcribed_time - 0.4) and abs_time < (chunk_end_time - overlap):
                                 chunk_text += word.word
                     
                     if chunk_text:
@@ -1054,7 +1057,7 @@ class DictationDaemon:
                     if segment.words:
                         for word in segment.words:
                             abs_time = chunk_start_time + word.start
-                            if abs_time >= self.last_transcribed_time:
+                            if abs_time >= (self.last_transcribed_time - 0.4):
                                 chunk_text += word.word
                     else:
                         chunk_text += segment.text
@@ -1209,12 +1212,16 @@ class DictationDaemon:
                 
             prompt_parts.append(f"Texto a corregir AHORA:\n{text}")
             
+            gen_config = types.GenerateContentConfig(
+                temperature=float(self.config.get("llm_temperature", 0.7))
+            )
+            if self.config.get("llm_thinking", False):
+                gen_config.thinking_config = types.ThinkingConfig(thinking_budget=-1)
+                
             response = client.models.generate_content_stream(
                 model=self.config.get("model", "gemma-4"),
                 contents=prompt_parts,
-                config=types.GenerateContentConfig(
-                    temperature=float(self.config.get("llm_temperature", 0.7))
-                )
+                config=gen_config
             )
             
             cleaned_text = ""
@@ -1327,5 +1334,20 @@ class DictationDaemon:
         return False
 
 if __name__ == "__main__":
+    # Check if daemon is already running
+    import sys
+    try:
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.connect(SOCKET_PATH)
+        # If it connects, daemon is running. Send 'settings' command to open config.
+        if "--settings" in sys.argv or len(sys.argv) == 1:
+            s.sendall(b"settings")
+        s.close()
+        print("OpenDictate is already running. Settings window opened.")
+        sys.exit(0)
+    except Exception:
+        # Not running, start normal
+        pass
+        
     app = DictationDaemon()
     Gtk.main()

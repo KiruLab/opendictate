@@ -26,6 +26,9 @@ If you encounter these issues or simply want better quality and speed, you can e
 4. Open the OpenDictate settings, navigate to the **AI & Models** tab, and paste your API key.
 5. In the **Model** field, you can leave the default, or upgrade it to `gemini-1.5-pro` (or any other supported model) if you want the best performance and reliability.
 
+**Thinking Mode (Chain of Thought):**
+You can also enable the **AI Thinking Mode** from the settings. This allows the model to "think" out loud before returning the cleaned text, improving complex reasoning tasks. Please refer to the [Gemma on Gemini API docs](https://ai.google.dev/gemma/docs/core/gemma_on_gemini_api) for model compatibility, as some models (like certain `gemini-2.0` versions) natively support advanced thinking capabilities.
+
 ## 🚀 Key Features
 
 * **100% Local and Private**: Uses Whisper models running entirely on your local machine.

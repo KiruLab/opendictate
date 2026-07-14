@@ -203,7 +203,7 @@ async def watch_state(ws):
                 await ws.send(json.dumps({
                     "event": "setState",
                     "context": ctx,
-                    "payload": {"state": 1 if hide_bubble else 0}
+                    "payload": {"state": 0 if hide_bubble else 1}
                 }))
 
         if changed or needs_animation:
@@ -347,7 +347,7 @@ async def connect_streamdeck():
                     asyncio.create_task(ws.send(json.dumps({
                         "event": "setState",
                         "context": context,
-                        "payload": {"state": 1 if hide_bubble else 0}
+                        "payload": {"state": 0 if hide_bubble else 1}
                     })))
                 elif act_suffix == "send":
                     send_usable = 1 if current_state in ["RECORDING", "PAUSED"] else 0
