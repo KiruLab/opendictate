@@ -3,6 +3,10 @@
 A powerful and versatile local dictation assistant for Linux (Wayland/X11) powered by `faster-whisper`.
 OpenDictate runs in the background and allows you to dictate text into any application, rewrite it using Artificial Intelligence (Gemma/Gemini), and control everything via keyboard shortcuts or an Elgato Stream Deck using **OpenDeck**.
 
+## 📸 Screenshots
+
+![App Running](img/app_running_3.gif)
+
 ## 🌍 Multilingual Capabilities
 Thanks to the robust architecture of OpenAI's Whisper models, OpenDictate natively supports multilingual transcription. You can dictate in English, Spanish, French, German, Italian, Portuguese, and many other languages. The tool allows you to:
 - Automatically detect the spoken language.
@@ -54,6 +58,23 @@ You can also enable the **AI Thinking Mode** from the settings. This allows the 
    *The script will install the required Ubuntu dependencies (xdotool, wl-clipboard, libayatana, etc.), create a virtual environment in `~/.local/share/dictate-whisper` and download the Python packages.*
 
 3. You can find the app shortcut in your application drawer. Open it to access the Settings UI where you can configure your API Key, Whisper model, languages, and app profiles.
+<p align="center">
+<img src="img/app_running_2.png"/>
+</p>
+
+---
+
+## ⚙️ Configuration Window
+
+The settings window allows you to configure API keys, models, language, and per-app behavior profiles.
+
+<p align="center">
+  <img src="img/config_1.png" width="48%" />
+  <img src="img/config_2.png" width="48%" />
+  <br>
+  <img src="img/config_3.png" width="48%" />
+  <img src="img/config_4.png" width="48%" />
+</p>
 
 ---
 
@@ -88,6 +109,11 @@ OpenDictate includes a full plugin for **OpenDeck**, perfect for having physical
 2. The `install.sh` script automatically copies the plugin to your OpenDeck configuration folder.
 3. **Restart the OpenDeck application**.
 4. In the OpenDeck configuration interface, look for the **"OpenDictate"** category.
+
+![OpenDeck Plugin UI](img/opendeck_ui.png)
+
+*Example using a Mirabox keypad:*
+![Mirabox Keypad](img/hardware_mirabox.jpg)
 
 ### Available Actions in OpenDeck
 

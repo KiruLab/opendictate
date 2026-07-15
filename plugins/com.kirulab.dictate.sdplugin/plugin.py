@@ -121,15 +121,15 @@ async def watch_state(ws):
         if current_state == "RECORDING":
             title = current_time
         elif current_state == "PAUSED":
-            title = f"Pausado\n{current_time}"
+            title = f"Paused\n{current_time}"
         elif current_state == "TRANSCRIBING":
-            title = "Pensando..."
+            title = "Thinking..."
         elif current_state == "CLEANING":
-            title = "Limpiando IA"
+            title = "AI Cleanup"
         elif current_state == "IDLE":
             title = model
         elif current_state == "LOADING":
-            title = f"Cargando\n{model}"
+            title = f"Loading\n{model}"
         else:
             title = "Offline"
             
@@ -302,15 +302,15 @@ async def connect_streamdeck():
                     if current_state == "RECORDING":
                         title = current_time
                     elif current_state == "PAUSED":
-                        title = f"Pausado\n{current_time}"
+                        title = f"Paused\n{current_time}"
                     elif current_state == "TRANSCRIBING":
-                        title = "Pensando..."
+                        title = "Thinking..."
                     elif current_state == "CLEANING":
-                        title = "Limpiando IA"
+                        title = "AI Cleanup"
                     elif current_state == "IDLE":
                         title = model
                     elif current_state == "LOADING":
-                        title = f"Cargando\n{model}"
+                        title = f"Loading\n{model}"
                     else:
                         title = "Offline"
                         

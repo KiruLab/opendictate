@@ -34,7 +34,7 @@ fi
 
 rm -rf "$VENV_DIR"
 uv venv --system-site-packages --python /usr/bin/python3 "$VENV_DIR"
-uv pip install faster-whisper google-genai pycairo --python "$VENV_DIR"
+uv pip install faster-whisper google-genai pycairo keyring --python "$VENV_DIR"
 
 echo "🔧 Actualizando shebangs para usar el entorno virtual..."
 sed -i "1s|.*|#!$VENV_DIR/bin/python|" "$INSTALL_DIR/dictate-daemon.py"

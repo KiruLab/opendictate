@@ -870,7 +870,7 @@ class DictationDaemon:
         if not self.config.get("hide_bubble", False):
             self.window.show_all()
         self.text_view_scroll.show_all()
-        self.text_buffer.set_text("Escuchando...")
+        self.text_buffer.set_text(self.i18n.t("recording"))
         self.button_box.hide()
         
         self.status_icon.show()
@@ -971,7 +971,7 @@ class DictationDaemon:
         self.resume_media()
         self.state = "TRANSCRIBING"
         self.processing_start_time = time.time()
-        self.update_tray_status("Transcribiendo...")
+        self.update_tray_status(self.i18n.t("transcribing"))
         
         if self.record_proc:
             if self.record_proc.poll() is None:
@@ -1190,7 +1190,7 @@ class DictationDaemon:
             ctx.add_class("cleaning")
             self.level_bar.set_value(1.0)
             
-            self.update_tray_status("Limpiando texto...")
+            self.update_tray_status(self.i18n.t("cleaning"))
             threading.Thread(target=self.clean_text_llm, args=(text,), daemon=True).start()
         else:
             self.finalize_text(text)
@@ -1212,11 +1212,12 @@ class DictationDaemon:
             )
             
             default_base_prompt = (
-                "Eres un asistente de dictado en tiempo real.\n"
-                "Tu objetivo es limpiar el siguiente texto dictado por voz, corrigiendo errores obvios de reconocimiento de voz y puntuación, pero manteniéndolo lo más fiel posible al original.\n"
-                "Si el texto incluye instrucciones verbales sobre formato (ej. 'abre paréntesis', 'nueva línea', 'coma', 'punto'), aplícalas.\n"
-                "Utiliza las mayúsculas cuando corresponda y corrige las palabras homófonas según el contexto para darle sentido al texto sin cambiar las palabras originales ni agregar texto extra.\n"
-                "Devuelve ÚNICAMENTE el texto corregido, sin saludos ni explicaciones."
+                "You are a real-time voice dictation assistant.\n"
+                "Your objective is to clean up the following voice-dictated text, correcting obvious speech recognition errors and punctuation, while keeping it as faithful to the original as possible.\n"
+                "If the text includes verbal formatting instructions (e.g. 'open parenthesis', 'new line', 'comma', 'period'), apply them.\n"
+                "Use capitalization when appropriate and correct homophones based on context to make sense of the text without changing the original words or adding extra text.\n"
+                "CRITICAL: You MUST reply in the EXACT SAME LANGUAGE as the dictated text. Do not translate it. For example, if the input is in Spanish, output in Spanish.\n"
+                "Return ONLY the corrected text, without greetings, explanations or translations."
             )
             base_prompt = self.config.get("base_system_prompt", default_base_prompt)
             prompt_parts = [base_prompt]
@@ -1234,7 +1235,7 @@ class DictationDaemon:
                     enable_vision = bool(row[1])
                     
                     if app_prompt:
-                        prompt_parts.append(f"Contexto específico de esta aplicación ({self.current_app_class}): {app_prompt}")
+                        prompt_parts.append(f"Specific context for this application ({self.current_app_class}): {app_prompt}")
                         
                     if enable_vision:
                         import subprocess
@@ -1250,7 +1251,7 @@ class DictationDaemon:
                                     f.write(res.stdout)
                                 
                                 my_file = client.files.upload(file=shot_path)
-                                prompt_parts.append("A continuación, una imagen de contexto (pantallazo o imagen copiada en el portapapeles):")
+                                prompt_parts.append("Below is a context image (screenshot or image copied to clipboard):")
                                 prompt_parts.append(my_file)
                                 logging.info("Imagen del portapapeles adjuntada exitosamente al prompt.")
                             else:
@@ -1262,7 +1263,7 @@ class DictationDaemon:
                 cursor.execute("SELECT llm_text, original_text FROM history WHERE app_class = ? ORDER BY id DESC LIMIT 3", (getattr(self, 'current_app_class', ''),))
                 history_rows = cursor.fetchall()
                 if history_rows:
-                    hist_text = "Historial reciente de dictados en esta aplicación (sólo como referencia de contexto, NO lo repitas):\n"
+                    hist_text = "Recent dictation history in this application (only for context reference, DO NOT repeat it):\n"
                     for h_llm, h_orig in reversed(history_rows):
                         ref_text = h_llm if h_llm else h_orig
                         if ref_text:
@@ -1273,7 +1274,7 @@ class DictationDaemon:
             except Exception as e:
                 logging.error(f"Error fetching DB context: {e}")
                 
-            prompt_parts.append(f"Texto a corregir AHORA:\n{text}")
+            prompt_parts.append(f"Text to correct NOW:\n{text}")
             
             gen_config = types.GenerateContentConfig(
                 temperature=float(self.config.get("llm_temperature", 0.7))
@@ -1334,6 +1335,7 @@ class DictationDaemon:
 
     def show_preview(self):
         self.state = "PREVIEW"
+        self.window.show_all()
         self.status_icon.hide()
         self.time_label.hide()
         self.level_bar.hide()

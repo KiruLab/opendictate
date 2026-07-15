@@ -139,7 +139,7 @@ class ConfigWindow(Gtk.Window):
         self.base_prompt_view = Gtk.TextView()
         self.base_prompt_view.set_wrap_mode(Gtk.WrapMode.WORD)
         
-        default_base_prompt = "Eres un asistente de dictado en tiempo real.\nTu objetivo es limpiar el siguiente texto dictado por voz, corrigiendo errores obvios de reconocimiento de voz y puntuación, pero manteniéndolo lo más fiel posible al original.\nSi el texto incluye instrucciones verbales sobre formato (ej. 'abre paréntesis', 'nueva línea', 'coma', 'punto'), aplícalas.\nUtiliza las mayúsculas cuando corresponda y corrige las palabras homófonas según el contexto para darle sentido al texto sin cambiar las palabras originales ni agregar texto extra.\nDevuelve ÚNICAMENTE el texto corregido, sin saludos ni explicaciones."
+        default_base_prompt = "You are a real-time voice dictation assistant.\nYour objective is to clean up the following voice-dictated text, correcting obvious speech recognition errors and punctuation, while keeping it as faithful to the original as possible.\nIf the text includes verbal formatting instructions (e.g. 'open parenthesis', 'new line', 'comma', 'period'), apply them.\nUse capitalization when appropriate and correct homophones based on context to make sense of the text without changing the original words or adding extra text.\nCRITICAL: You MUST reply in the EXACT SAME LANGUAGE as the dictated text. Do not translate it. For example, if the input is in Spanish, output in Spanish.\nReturn ONLY the corrected text, without greetings, explanations or translations."
         self.base_prompt_view.get_buffer().set_text(self.config.get("base_system_prompt", default_base_prompt))
         self.base_prompt_view.connect("focus-out-event", self.auto_save)
         

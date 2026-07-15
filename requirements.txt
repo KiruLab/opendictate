@@ -1,0 +1,4 @@
+faster-whisper
+google-genai
+pycairo
+keyring
