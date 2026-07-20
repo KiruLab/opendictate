@@ -1,0 +1,11 @@
+{
+  "name": "OpenDictate Status",
+  "description": "Top bar integration for OpenDictate with quick controls and recording status.",
+  "uuid": "com.kirulab.dictate@kirulab.com",
+  "shell-version": [
+    "45",
+    "46",
+    "47"
+  ],
+  "url": "https://github.com/KiruLab/opendictate"
+}

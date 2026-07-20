@@ -1,0 +1,34 @@
+.opendictate-box {
+    spacing: 6px;
+    padding: 0 4px;
+}
+
+.recording {
+    color: #ed333b; /* Red GNOME color */
+}
+
+.paused {
+    color: #f6d32d; /* Yellow GNOME color */
+}
+
+.opendictate-time-label {
+    font-weight: bold;
+    font-feature-settings: "tnum";
+}
+
+.opendictate-button {
+    border-radius: 9999px;
+    padding: 2px;
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.opendictate-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.opendictate-button:active {
+    background-color: rgba(255, 255, 255, 0.3);
+}

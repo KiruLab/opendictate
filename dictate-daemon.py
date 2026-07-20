@@ -224,7 +224,13 @@ class DictationDaemon:
     def export_state(self):
         try:
             with open("/tmp/dictate_state.json", "w") as f:
-                json.dump({"state": self.state, "model": self.model_size}, f)
+                json.dump({
+                    "state": self.state, 
+                    "model": self.model_size,
+                    "start_time": getattr(self, 'start_time', 0),
+                    "pause_start_time": getattr(self, 'pause_start_time', 0),
+                    "total_paused_time": getattr(self, 'total_paused_time', 0)
+                }, f)
         except Exception as e:
             logging.error(f"Error exporting state: {e}")
 
@@ -775,6 +781,8 @@ class DictationDaemon:
             
             if self.audio_file_handle:
                 self.audio_file_handle.close()
+                
+            self.resume_media()
                 
             self.status_icon.set_text("❌")
             GLib.timeout_add(700, self.reset_state)
