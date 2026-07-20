@@ -45,6 +45,7 @@ TRANSLATIONS = {
         "tab_general": "General",
         "tab_apps": "Applications",
         "tab_ai": "AI & Models",
+        "tab_models": "Model Manager",
         "tab_advanced": "Advanced",
         
         "ui_language": "UI Language:",
@@ -87,7 +88,12 @@ TRANSLATIONS = {
         "msg_saved_adv": "Advanced settings saved successfully.",
         "msg_rule_added": "Rule for {} saved successfully.",
         "msg_rule_deleted": "Rule for {} deleted.",
-        "msg_select_app": "Select an application"
+        "msg_select_app": "Select an application",
+        
+        "model_downloaded": "✅ Downloaded",
+        "model_not_downloaded": "❌ Not downloaded",
+        "btn_activate": "Activate",
+        "active_model": " (Active)"
     },
     "es": {
         "ready": "Listo ({})",
@@ -130,6 +136,7 @@ TRANSLATIONS = {
         "tab_general": "General",
         "tab_apps": "Aplicaciones",
         "tab_ai": "IA y Modelos",
+        "tab_models": "Gestor de Modelos",
         "tab_advanced": "Avanzado",
 
         "ui_language": "Idioma de la interfaz:",
@@ -173,7 +180,12 @@ TRANSLATIONS = {
         "msg_saved_adv": "Configuración avanzada guardada exitosamente.",
         "msg_rule_added": "Regla para {} guardada exitosamente.",
         "msg_rule_deleted": "Regla para {} eliminada.",
-        "msg_select_app": "Selecciona una aplicación"
+        "msg_select_app": "Selecciona una aplicación",
+        
+        "model_downloaded": "✅ Descargado",
+        "model_not_downloaded": "❌ No descargado",
+        "btn_activate": "Activar",
+        "active_model": " (Activo)"
     },
     "de": {
         "ready": "Bereit ({})",
@@ -216,6 +228,7 @@ TRANSLATIONS = {
         "tab_general": "Allgemein",
         "tab_apps": "Anwendungen",
         "tab_ai": "KI & Modelle",
+        "tab_models": "Modell-Manager",
         "tab_advanced": "Erweitert",
         
         "ui_language": "UI-Sprache:",
@@ -259,7 +272,12 @@ TRANSLATIONS = {
         "msg_saved_adv": "Erweiterte Einstellungen erfolgreich gespeichert.",
         "msg_rule_added": "Regel für {} erfolgreich gespeichert.",
         "msg_rule_deleted": "Regel für {} gelöscht.",
-        "msg_select_app": "Wählen Sie eine Anwendung"
+        "msg_select_app": "Wählen Sie eine Anwendung",
+        
+        "model_downloaded": "✅ Heruntergeladen",
+        "model_not_downloaded": "❌ Nicht heruntergeladen",
+        "btn_activate": "Aktivieren",
+        "active_model": " (Aktiv)"
     },
     "fr": {
         "ready": "Prêt ({})",
@@ -302,6 +320,7 @@ TRANSLATIONS = {
         "tab_general": "Général",
         "tab_apps": "Applications",
         "tab_ai": "IA et Modèles",
+        "tab_models": "Gestionnaire de Modèles",
         "tab_advanced": "Avancé",
         
         "ui_language": "Langue de l'interface :",
@@ -345,7 +364,12 @@ TRANSLATIONS = {
         "msg_saved_adv": "Paramètres avancés enregistrés avec succès.",
         "msg_rule_added": "Règle pour {} enregistrée avec succès.",
         "msg_rule_deleted": "Règle pour {} supprimée.",
-        "msg_select_app": "Sélectionnez une application"
+        "msg_select_app": "Sélectionnez une application",
+        
+        "model_downloaded": "✅ Téléchargé",
+        "model_not_downloaded": "❌ Non téléchargé",
+        "btn_activate": "Activer",
+        "active_model": " (Actif)"
     }
 }
 

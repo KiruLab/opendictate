@@ -281,12 +281,67 @@ class ConfigWindow(Gtk.Window):
         ui_opts_box.pack_start(self.use_gnome_ext_check, False, False, 0)
         
         adv_box.pack_start(ui_opts_box, False, False, 10)
+        
+        # Tab 5: Gestor de Modelos
+        models_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        models_box.set_border_width(15)
+        notebook.append_page(models_box, Gtk.Label(label=self.i18n.t("tab_models")))
+        
+        scroll_models = Gtk.ScrolledWindow()
+        scroll_models.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        models_box.pack_start(scroll_models, True, True, 0)
+        
+        self.models_listbox = Gtk.ListBox()
+        self.models_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
+        scroll_models.add(self.models_listbox)
+        
+        self.refresh_models_list()
 
         self.show_all()
         
     def on_delete_event(self, widget, event):
         self.hide()
         return True
+
+    def refresh_models_list(self):
+        for child in self.models_listbox.get_children():
+            self.models_listbox.remove(child)
+            
+        models = ["tiny", "tiny.en", "base", "base.en", "small", "small.en", "medium", "medium.en", "large-v1", "large-v2", "large-v3", "large"]
+        active_model = self.config.get("whisper_model_size", "medium")
+        
+        for m in models:
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            row.add(hbox)
+            
+            # Name
+            name_lbl = Gtk.Label(label=m, xalign=0)
+            if m == active_model:
+                name_lbl.set_markup(f"<b>{m}</b> {self.i18n.t('active_model')}")
+            hbox.pack_start(name_lbl, True, True, 10)
+            
+            # Status
+            hf_path = os.path.expanduser(f"~/.cache/huggingface/hub/models--Systran--faster-whisper-{m}")
+            downloaded = os.path.exists(hf_path)
+            status_str = self.i18n.t("model_downloaded") if downloaded else self.i18n.t("model_not_downloaded")
+            status_lbl = Gtk.Label(label=status_str)
+            hbox.pack_start(status_lbl, False, False, 10)
+            
+            # Button
+            btn = Gtk.Button(label=self.i18n.t("btn_activate"))
+            if m == active_model:
+                btn.set_sensitive(False)
+            btn.connect("clicked", self.on_activate_model_clicked, m)
+            hbox.pack_start(btn, False, False, 10)
+            
+            self.models_listbox.add(row)
+        self.models_listbox.show_all()
+
+    def on_activate_model_clicked(self, widget, model_name):
+        self.config["whisper_model_size"] = model_name
+        self.auto_save()
+        self.refresh_models_list()
 
     def on_gnome_ext_toggle(self, switch):
         if self._updating_ui: return

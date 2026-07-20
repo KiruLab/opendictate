@@ -528,11 +528,16 @@ class DictationDaemon:
         self.config_window = None
 
     def on_config_saved(self, new_config=None):
+        old_model = self.config.get("whisper_model_size") if hasattr(self, 'config') else None
+        
         if new_config is not None:
             self.config = new_config
             self.save_config()
         else:
             self.config = self.load_config()
+            
+        new_model = self.config.get("whisper_model_size")
+        
         self.i18n = get_translator(self.config.get("ui_language", "en"))
         self.build_menu()
         if hasattr(self, 'auto_send_check'):
@@ -541,6 +546,11 @@ class DictationDaemon:
             self.ai_check.set_active(self.config.get("ai_enabled", False))
         logging.info("Configuración recargada.")
         self.export_state()
+        
+        if old_model and new_model and old_model != new_model:
+            if self.state == "IDLE":
+                self.load_model_async(new_model)
+
 
     def on_auto_send_toggled_from_ui(self, widget):
         if self.config.get("auto_send", False) != widget.get_active():

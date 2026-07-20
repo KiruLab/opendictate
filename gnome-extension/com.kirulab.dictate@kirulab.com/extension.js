@@ -5,10 +5,50 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const STATE_FILE = '/tmp/dictate_state.json';
 const SOCKET_PATH = '/tmp/dictate_daemon.socket';
+
+const Waveform = GObject.registerClass(
+class Waveform extends St.DrawingArea {
+    _init() {
+        super._init({ style_class: 'opendictate-waveform' });
+        this._levels = new Array(30).fill(0);
+    }
+
+    addLevel(level) {
+        this._levels.shift();
+        this._levels.push(level);
+        this.queue_repaint();
+    }
+
+    vfunc_repaint() {
+        let cr = this.get_context();
+        let [width, height] = this.get_surface_size();
+        
+        cr.setSourceRGBA(1.0, 1.0, 1.0, 0.7);
+        cr.setLineWidth(2.0);
+        cr.setLineCap(1); // ROUND
+        
+        let step = width / (this._levels.length - 1);
+        
+        for (let i = 0; i < this._levels.length; i++) {
+            let val = this._levels[i] * (height / 2);
+            let x = i * step;
+            let y1 = (height / 2) - val;
+            let y2 = (height / 2) + val;
+            if (val < 0.5) {
+                y1 = (height / 2) - 0.5;
+                y2 = (height / 2) + 0.5;
+            }
+            cr.moveTo(x, y1);
+            cr.lineTo(x, y2);
+        }
+        cr.stroke();
+    }
+});
 
 const OpenDictateIndicator = GObject.registerClass(
 class OpenDictateIndicator extends PanelMenu.Button {
@@ -17,24 +57,43 @@ class OpenDictateIndicator extends PanelMenu.Button {
         
         this._box = new St.BoxLayout({ style_class: 'opendictate-box' });
         
-        // Microphone Icon (Main Button)
+        // Gear Icon for menu
+        this._gearIcon = new St.Icon({
+            icon_name: 'emblem-system-symbolic',
+            style_class: 'system-status-icon opendictate-gear-icon',
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        
+        // Microphone/Record Icon (Main Button)
+        this._micIcon = new St.Icon({
+            icon_name: 'audio-input-microphone-symbolic',
+            style_class: 'system-status-icon',
+        });
         this._mainButton = new St.Button({
-            child: new St.Icon({
-                icon_name: 'audio-input-microphone-symbolic',
-                style_class: 'system-status-icon',
-            }),
-            style_class: 'panel-button',
+            child: this._micIcon,
+            style_class: 'opendictate-action-button',
             reactive: true,
             can_focus: true,
             track_hover: true,
+            y_align: Clutter.ActorAlign.CENTER,
         });
         this._mainButton.connect('button-press-event', (actor, event) => {
             if (event.get_button() === 1) { // Left click
-                this._sendCommand('record');
+                if (this._stateData && this._stateData.state === "RECORDING") {
+                    this._sendCommand('pause');
+                } else if (this._stateData && this._stateData.state === "PAUSED") {
+                    this._sendCommand('record');
+                } else {
+                    this._sendCommand('record');
+                }
                 return Clutter.EVENT_STOP;
             }
             return Clutter.EVENT_PROPAGATE;
         });
+        
+        // Waveform
+        this._waveform = new Waveform();
+        this._waveform.y_align = Clutter.ActorAlign.CENTER;
         
         // Time Label
         this._timeLabel = new St.Label({
@@ -43,21 +102,21 @@ class OpenDictateIndicator extends PanelMenu.Button {
             style_class: 'opendictate-time-label'
         });
         
-        // Pause Button
-        this._pauseButton = new St.Button({
+        // Send Button
+        this._sendButton = new St.Button({
             child: new St.Icon({
-                icon_name: 'media-playback-pause-symbolic',
-                style_class: 'system-status-icon',
+                icon_name: 'mail-send-symbolic',
+                style_class: 'system-status-icon opendictate-send-icon',
             }),
-            style_class: 'opendictate-button',
+            style_class: 'opendictate-action-button',
             y_align: Clutter.ActorAlign.CENTER,
             reactive: true,
             can_focus: true,
             track_hover: true,
         });
-        this._pauseButton.connect('button-press-event', (actor, event) => {
+        this._sendButton.connect('button-press-event', (actor, event) => {
             if (event.get_button() === 1) {
-                this._sendCommand('pause');
+                this._sendCommand('send');
                 return Clutter.EVENT_STOP;
             }
             return Clutter.EVENT_PROPAGATE;
@@ -66,10 +125,10 @@ class OpenDictateIndicator extends PanelMenu.Button {
         // Cancel Button
         this._cancelButton = new St.Button({
             child: new St.Icon({
-                icon_name: 'media-playback-stop-symbolic',
-                style_class: 'system-status-icon',
+                icon_name: 'process-stop-symbolic',
+                style_class: 'system-status-icon opendictate-cancel-icon',
             }),
-            style_class: 'opendictate-button',
+            style_class: 'opendictate-action-button',
             y_align: Clutter.ActorAlign.CENTER,
             reactive: true,
             can_focus: true,
@@ -84,16 +143,46 @@ class OpenDictateIndicator extends PanelMenu.Button {
         });
         
         // Add children
+        this._box.add_child(this._gearIcon);
         this._box.add_child(this._mainButton);
+        this._box.add_child(this._waveform);
         this._box.add_child(this._timeLabel);
-        this._box.add_child(this._pauseButton);
+        this._box.add_child(this._sendButton);
         this._box.add_child(this._cancelButton);
         
         this.add_child(this._box);
         
+        this._waveform.hide();
         this._timeLabel.hide();
-        this._pauseButton.hide();
+        this._sendButton.hide();
         this._cancelButton.hide();
+        
+        // Setup Context Menu
+        this.autosendToggle = new PopupMenu.PopupSwitchMenuItem('Auto-Send (Enter)', false);
+        this.autosendToggle.connect('toggled', () => {
+            if (!this._updatingToggles) this._sendCommand('toggle-autosend');
+        });
+        this.menu.addMenuItem(this.autosendToggle);
+
+        this.aiToggle = new PopupMenu.PopupSwitchMenuItem('AI Cleanup', false);
+        this.aiToggle.connect('toggled', () => {
+            if (!this._updatingToggles) this._sendCommand('toggle-ai');
+        });
+        this.menu.addMenuItem(this.aiToggle);
+        
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        this.settingsItem = new PopupMenu.PopupMenuItem('Settings');
+        this.settingsItem.connect('activate', () => {
+            this._sendCommand('settings');
+        });
+        this.menu.addMenuItem(this.settingsItem);
+        
+        this.quitItem = new PopupMenu.PopupMenuItem('Quit OpenDictate');
+        this.quitItem.connect('activate', () => {
+            this._sendCommand('quit');
+        });
+        this.menu.addMenuItem(this.quitItem);
         
         this._stateData = null;
         this._timerId = null;
@@ -126,16 +215,29 @@ class OpenDictateIndicator extends PanelMenu.Button {
         this._stateData = stateData;
         let state = stateData.state || "IDLE";
         
-        let icon = this._mainButton.get_child();
+        this._updatingToggles = true;
+        if (stateData.autosend_enabled !== undefined && this.autosendToggle.state !== stateData.autosend_enabled) {
+            this.autosendToggle.setToggleState(stateData.autosend_enabled);
+        }
+        if (stateData.ai_enabled !== undefined && this.aiToggle.state !== stateData.ai_enabled) {
+            this.aiToggle.setToggleState(stateData.ai_enabled);
+        }
+        this._updatingToggles = false;
+        
+        let icon = this._micIcon;
         
         if (state === "RECORDING") {
             icon.icon_name = 'media-record-symbolic';
             icon.add_style_class_name('recording');
             icon.remove_style_class_name('paused');
             
+            this._waveform.show();
+            if (stateData.level !== undefined) {
+                this._waveform.addLevel(stateData.level);
+            }
+            
             this._timeLabel.show();
-            this._pauseButton.show();
-            this._pauseButton.get_child().icon_name = 'media-playback-pause-symbolic';
+            this._sendButton.show();
             this._cancelButton.show();
             this._startTimer();
             
@@ -144,20 +246,21 @@ class OpenDictateIndicator extends PanelMenu.Button {
             icon.remove_style_class_name('recording');
             icon.add_style_class_name('paused');
             
+            this._waveform.show();
             this._timeLabel.show();
-            this._pauseButton.show();
-            this._pauseButton.get_child().icon_name = 'media-record-symbolic'; // To resume
+            this._sendButton.show();
             this._cancelButton.show();
             this._stopTimer();
             this._updateTimeDisplay();
             
-        } else if (state === "LOADING" || state === "PREVIEW" || state === "CLEANING" || state === "PROCESSING") {
+        } else if (state === "LOADING" || state === "PREVIEW" || state === "CLEANING" || state === "PROCESSING" || state === "TRANSCRIBING") {
             icon.icon_name = 'view-refresh-symbolic';
             icon.remove_style_class_name('recording');
             icon.remove_style_class_name('paused');
             
+            this._waveform.hide();
             this._timeLabel.hide();
-            this._pauseButton.hide();
+            this._sendButton.hide();
             this._cancelButton.hide();
             this._stopTimer();
         } else {
@@ -165,8 +268,9 @@ class OpenDictateIndicator extends PanelMenu.Button {
             icon.remove_style_class_name('recording');
             icon.remove_style_class_name('paused');
             
+            this._waveform.hide();
             this._timeLabel.hide();
-            this._pauseButton.hide();
+            this._sendButton.hide();
             this._cancelButton.hide();
             this._stopTimer();
         }
@@ -227,7 +331,7 @@ class OpenDictateIndicator extends PanelMenu.Button {
         try {
             this._monitor = file.monitor_file(Gio.FileMonitorFlags.NONE, null);
             this._monitor.connect('changed', (monitor, file, otherFile, eventType) => {
-                if (eventType === Gio.FileMonitorEvent.CHANGES_DONE_HINT || eventType === Gio.FileMonitorEvent.CREATED) {
+                if (eventType === Gio.FileMonitorEvent.CHANGES_DONE_HINT || eventType === Gio.FileMonitorEvent.CREATED || eventType === Gio.FileMonitorEvent.CHANGED) {
                     this._readStateFile();
                 }
             });

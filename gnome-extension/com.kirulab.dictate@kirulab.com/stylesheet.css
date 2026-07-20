@@ -3,6 +3,10 @@
     padding: 0 4px;
 }
 
+.opendictate-gear-icon {
+    margin-right: 2px;
+}
+
 .recording {
     color: #ed333b; /* Red GNOME color */
 }
@@ -11,24 +15,37 @@
     color: #f6d32d; /* Yellow GNOME color */
 }
 
+.opendictate-waveform {
+    width: 60px;
+    height: 24px;
+    margin: 0 4px;
+}
+
 .opendictate-time-label {
     font-weight: bold;
     font-feature-settings: "tnum";
+    margin: 0 4px;
 }
 
-.opendictate-button {
-    border-radius: 9999px;
-    padding: 2px;
-    width: 24px;
-    height: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.1);
+.opendictate-action-button {
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 0 2px;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-.opendictate-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+.opendictate-action-button:hover {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
-.opendictate-button:active {
-    background-color: rgba(255, 255, 255, 0.3);
+.opendictate-action-button:active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.opendictate-send-icon {
+    color: #57e389; /* Green GNOME color */
+}
+
+.opendictate-cancel-icon {
+    color: #ed333b; /* Red GNOME color */
 }
