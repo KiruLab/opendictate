@@ -17,16 +17,23 @@ class OpenDictateIndicator extends PanelMenu.Button {
         
         this._box = new St.BoxLayout({ style_class: 'opendictate-box' });
         
-        // Microphone Icon
+        // Microphone Icon (Main Button)
         this._mainButton = new St.Button({
             child: new St.Icon({
                 icon_name: 'audio-input-microphone-symbolic',
                 style_class: 'system-status-icon',
             }),
             style_class: 'panel-button',
+            reactive: true,
+            can_focus: true,
+            track_hover: true,
         });
-        this._mainButton.connect('clicked', () => {
-            this._sendCommand('record');
+        this._mainButton.connect('button-press-event', (actor, event) => {
+            if (event.get_button() === 1) { // Left click
+                this._sendCommand('record');
+                return Clutter.EVENT_STOP;
+            }
+            return Clutter.EVENT_PROPAGATE;
         });
         
         // Time Label
@@ -44,9 +51,16 @@ class OpenDictateIndicator extends PanelMenu.Button {
             }),
             style_class: 'opendictate-button',
             y_align: Clutter.ActorAlign.CENTER,
+            reactive: true,
+            can_focus: true,
+            track_hover: true,
         });
-        this._pauseButton.connect('clicked', () => {
-            this._sendCommand('pause');
+        this._pauseButton.connect('button-press-event', (actor, event) => {
+            if (event.get_button() === 1) {
+                this._sendCommand('pause');
+                return Clutter.EVENT_STOP;
+            }
+            return Clutter.EVENT_PROPAGATE;
         });
         
         // Cancel Button
@@ -57,9 +71,16 @@ class OpenDictateIndicator extends PanelMenu.Button {
             }),
             style_class: 'opendictate-button',
             y_align: Clutter.ActorAlign.CENTER,
+            reactive: true,
+            can_focus: true,
+            track_hover: true,
         });
-        this._cancelButton.connect('clicked', () => {
-            this._sendCommand('cancel');
+        this._cancelButton.connect('button-press-event', (actor, event) => {
+            if (event.get_button() === 1) {
+                this._sendCommand('cancel');
+                return Clutter.EVENT_STOP;
+            }
+            return Clutter.EVENT_PROPAGATE;
         });
         
         // Add children
