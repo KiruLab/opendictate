@@ -264,11 +264,41 @@ class ConfigWindow(Gtk.Window):
         temp_box.pack_start(self.temp_scale, True, True, 0)
         adv_box.pack_start(temp_box, False, False, 0)
 
+        # UI Options
+        ui_opts_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        lbl_ui_opts = Gtk.Label(label=self.i18n.t("lbl_ui_options", default="Desktop Integration"), xalign=0)
+        lbl_ui_opts.set_markup(f"<b>{lbl_ui_opts.get_text()}</b>")
+        ui_opts_box.pack_start(lbl_ui_opts, False, False, 10)
+        
+        self.use_appindicator_check = Gtk.CheckButton(label=self.i18n.t("use_appindicator", default="Legacy Tray Icon (AppIndicator)"))
+        self.use_appindicator_check.set_active(self.config.get("use_appindicator", True))
+        self.use_appindicator_check.connect("toggled", self.auto_save)
+        ui_opts_box.pack_start(self.use_appindicator_check, False, False, 0)
+        
+        self.use_gnome_ext_check = Gtk.CheckButton(label=self.i18n.t("use_gnome_ext", default="GNOME Shell Extension (Top Bar)"))
+        self.use_gnome_ext_check.set_active(self.config.get("use_gnome_ext", False))
+        self.use_gnome_ext_check.connect("toggled", self.on_gnome_ext_toggle)
+        ui_opts_box.pack_start(self.use_gnome_ext_check, False, False, 0)
+        
+        adv_box.pack_start(ui_opts_box, False, False, 10)
+
         self.show_all()
         
     def on_delete_event(self, widget, event):
         self.hide()
         return True
+
+    def on_gnome_ext_toggle(self, switch):
+        if self._updating_ui: return
+        self.auto_save()
+        import subprocess
+        uuid = "com.kirulab.dictate@kirulab.com"
+        if switch.get_active():
+            subprocess.Popen(["gnome-extensions", "enable", uuid])
+        else:
+            subprocess.Popen(["gnome-extensions", "disable", uuid])
+        if self.daemon_ref:
+            self.daemon_ref.save_config()
 
     def load_config(self):
         if self.daemon_ref:
@@ -319,6 +349,10 @@ class ConfigWindow(Gtk.Window):
         self.config["auto_pause_media"] = self.auto_pause_switch.get_active()
         if hasattr(self, 'notifications_switch'):
             self.config["show_notifications"] = self.notifications_switch.get_active()
+
+        if hasattr(self, 'use_appindicator_check'):
+            self.config["use_appindicator"] = self.use_appindicator_check.get_active()
+            self.config["use_gnome_ext"] = self.use_gnome_ext_check.get_active()
 
         # Handle autostart desktop file
         autostart_dir = os.path.expanduser("~/.config/autostart")

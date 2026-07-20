@@ -419,6 +419,8 @@ class DictationDaemon:
         
     def setup_indicator(self):
         try:
+            if not self.config.get("use_appindicator", True):
+                return
             if HAS_INDICATOR:
                 self.indicator = AppIndicator.Indicator.new(
                     "dictate-daemon",
@@ -496,7 +498,7 @@ class DictationDaemon:
             self.indicator.set_menu(menu)
             
         # Actualizar estado del menu si el daemon ya esta listo
-        if self.state not in ["LOADING", "IDLE"]:
+        if self.state not in ["LOADING", "IDLE"] and hasattr(self, 'status_menu_item'):
             self.status_menu_item.set_label(self.state)
 
 

@@ -10,6 +10,11 @@ cp dictate_config_ui.py "$INSTALL_DIR/"
 cp i18n.py "$INSTALL_DIR/"
 cp -r plugins "$INSTALL_DIR/"
 
+echo "🧩 Actualizando Extensión de GNOME Shell..."
+GNOME_EXT_DIR="$HOME/.local/share/gnome-shell/extensions/com.kirulab.dictate@kirulab.com"
+mkdir -p "$GNOME_EXT_DIR"
+cp -r gnome-extension/com.kirulab.dictate@kirulab.com/* "$GNOME_EXT_DIR/"
+
 echo "📦 Instalando plugin en OpenDeck..."
 rm -rf "$HOME/.config/opendeck/plugins/com.butcherwutcher.dictate.sdplugin"
 rm -rf "$HOME/.config/opendeck/plugins/com.kirulab.dictate.sdplugin"

@@ -22,6 +22,12 @@ cp dictate_config_ui.py "$INSTALL_DIR/"
 cp i18n.py "$INSTALL_DIR/"
 cp -r plugins "$INSTALL_DIR/"
 cp -r img "$INSTALL_DIR/"
+
+echo "🧩 Instalando Extensión de GNOME Shell..."
+GNOME_EXT_DIR="$HOME/.local/share/gnome-shell/extensions/com.kirulab.dictate@kirulab.com"
+mkdir -p "$GNOME_EXT_DIR"
+cp -r gnome-extension/com.kirulab.dictate@kirulab.com/* "$GNOME_EXT_DIR/"
+
 chmod +x "$INSTALL_DIR/dictate-daemon.py"
 chmod +x "$INSTALL_DIR/dictate-client.py"
 
