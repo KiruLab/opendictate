@@ -266,16 +266,16 @@ class ConfigWindow(Gtk.Window):
 
         # UI Options
         ui_opts_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        lbl_ui_opts = Gtk.Label(label=self.i18n.t("lbl_ui_options", default="Desktop Integration"), xalign=0)
+        lbl_ui_opts = Gtk.Label(label="Desktop Integration", xalign=0)
         lbl_ui_opts.set_markup(f"<b>{lbl_ui_opts.get_text()}</b>")
         ui_opts_box.pack_start(lbl_ui_opts, False, False, 10)
         
-        self.use_appindicator_check = Gtk.CheckButton(label=self.i18n.t("use_appindicator", default="Legacy Tray Icon (AppIndicator)"))
+        self.use_appindicator_check = Gtk.CheckButton(label="Legacy Tray Icon (AppIndicator)")
         self.use_appindicator_check.set_active(self.config.get("use_appindicator", True))
         self.use_appindicator_check.connect("toggled", self.auto_save)
         ui_opts_box.pack_start(self.use_appindicator_check, False, False, 0)
         
-        self.use_gnome_ext_check = Gtk.CheckButton(label=self.i18n.t("use_gnome_ext", default="GNOME Shell Extension (Top Bar)"))
+        self.use_gnome_ext_check = Gtk.CheckButton(label="GNOME Shell Extension (Top Bar)")
         self.use_gnome_ext_check.set_active(self.config.get("use_gnome_ext", False))
         self.use_gnome_ext_check.connect("toggled", self.on_gnome_ext_toggle)
         ui_opts_box.pack_start(self.use_gnome_ext_check, False, False, 0)
